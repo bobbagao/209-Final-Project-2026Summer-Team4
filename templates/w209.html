@@ -1,6 +1,199 @@
 <!DOCTYPE html>
-<html><head><title>w209 site</title></head>
-<body>
-<h2>Hello World!</h2>
-<img src="{{url_for('static',filename=file)}}"/>
-</body></html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Energy and Equity Market Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <aside class="side-nav" aria-label="Section navigation">
+      <a href="#cover" class="side-link active">
+        <span class="side-dot"></span>
+        <span class="side-label">Cover</span>
+      </a>
+      <a href="#introduction" class="side-link">
+        <span class="side-dot"></span>
+        <span class="side-label">Introduction</span>
+      </a>
+      <a href="#chart-explorer" class="side-link">
+        <span class="side-dot"></span>
+        <span class="side-label">Explorer</span>
+      </a>
+      <a href="#hypothesis-1" class="side-link">
+        <span class="side-dot"></span>
+        <span class="side-label">Hypothesis 1</span>
+      </a>
+      <a href="#hypothesis-2" class="side-link">
+        <span class="side-dot"></span>
+        <span class="side-label">Hypothesis 2</span>
+      </a>
+      <a href="#hypothesis-3" class="side-link">
+        <span class="side-dot"></span>
+        <span class="side-label">Hypothesis 3</span>
+      </a>
+      <a href="#conclusion" class="side-link">
+        <span class="side-dot"></span>
+        <span class="side-label">Conclusion</span>
+      </a>
+    </aside>
+
+    <main class="page-shell">
+      {% for section in sections %}
+      <section id="{{ section.id }}" class="panel {{ 'panel-hero' if section.type == 'hero' else '' }}">
+        {% if section.type == 'hero' %}
+        <div class="hero-copy">
+          <p class="eyebrow">{{ section.eyebrow }}</p>
+          <h1>{{ section.title }}</h1>
+          <p class="hero-summary">{{ section.summary }}</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#hypothesis-1">Read hypothesis 1</a>
+            <a class="btn btn-secondary" href="#conclusion">See conclusion</a>
+          </div>
+          <div class="stat-row">
+            {% for stat in section.stats %}
+            <div class="stat-chip">{{ stat }}</div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="graph-card">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        {% else %}
+        <div class="section-meta">
+          <p class="eyebrow">{{ section.eyebrow }}</p>
+          <h2>{{ section.title }}</h2>
+          <p class="section-copy">{{ section.description }}</p>
+        </div>
+
+        {% if section.type == 'explorer' %}
+        <div class="explorer-shell">
+          <div class="explorer-window">
+            <div class="explorer-picker" role="tablist" aria-label="Chart selector">
+              {% for item in section.chart_items %}
+              <button
+                type="button"
+                class="explorer-btn{% if loop.first %} active{% endif %}"
+                data-title="{{ item.title }}"
+                data-caption="{{ item.caption }}"
+                data-image="{{ url_for('static', filename=item.src) }}"
+                data-alt="{{ item.alt }}"
+              >
+                <span>{{ item.title }}</span>
+              </button>
+              {% endfor %}
+            </div>
+            <div class="explorer-visual">
+              <img class="explorer-main-image" src="{{ url_for('static', filename=section.chart_items[0].src) }}" alt="{{ section.chart_items[0].alt }}" />
+              <div class="explorer-meta">
+                <h3 class="explorer-card-title">{{ section.chart_items[0].title }}</h3>
+                <p class="explorer-card-caption">{{ section.chart_items[0].caption }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% if section.highlights %}
+        <ul class="highlight-list">
+          {% for point in section.highlights %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% if section.metrics %}
+        <div class="metric-grid">
+          {% for metric in section.metrics %}
+          <article class="metric-card">
+            <strong>{{ metric.value }}</strong>
+            <span>{{ metric.label }}</span>
+          </article>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        {% if section.highlights %}
+        <ul class="highlight-list">
+          {% for point in section.highlights %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if section.images %}
+        <div class="image-grid">
+          {% for image in section.images %}
+          <figure class="section-figure">
+            <img src="{{ url_for('static', filename=image.src) }}" alt="{{ image.alt }}" />
+            <figcaption>{{ image.caption }}</figcaption>
+          </figure>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if section.metrics %}
+        <div class="metric-grid">
+          {% for metric in section.metrics %}
+          <article class="metric-card">
+            <strong>{{ metric.value }}</strong>
+            <span>{{ metric.label }}</span>
+          </article>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+      </section>
+      {% endfor %}
+    </main>
+
+    <script>
+      const sideLinks = Array.from(document.querySelectorAll('.side-link'));
+      const sections = Array.from(document.querySelectorAll('.panel'));
+
+      const setActiveLink = (id) => {
+        sideLinks.forEach((link) => {
+          const isActive = link.getAttribute('href') === '#' + id;
+          link.classList.toggle('active', isActive);
+        });
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveLink(entry.target.id);
+          }
+        });
+      }, {
+        rootMargin: '-35% 0px -45% 0px',
+        threshold: 0.15
+      });
+
+      sections.forEach((section) => observer.observe(section));
+
+      document.querySelectorAll('.explorer-shell').forEach((shell) => {
+        const buttons = Array.from(shell.querySelectorAll('.explorer-btn'));
+        const image = shell.querySelector('.explorer-main-image');
+        const title = shell.querySelector('.explorer-card-title');
+        const caption = shell.querySelector('.explorer-card-caption');
+
+        buttons.forEach((button) => {
+          button.addEventListener('click', () => {
+            buttons.forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+            image.src = button.dataset.image;
+            image.alt = button.dataset.alt;
+            title.textContent = button.dataset.title;
+            caption.textContent = button.dataset.caption;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
