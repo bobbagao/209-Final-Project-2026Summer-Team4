@@ -7,17 +7,6 @@ import altair as alt
 
 app = Flask(__name__)
 
-CHART_DIR = os.path.join(os.path.dirname(__file__), "static", "charts")
-CHART_FILES = {
-    "chart1": "chart1.png",
-    "chart2": "chart2.png",
-    "chart3": "chart3.png",
-    "chart4": "chart4.png",
-    "chart6": "chart6.png",
-}
-
-app.config["CHART_DIR"] = CHART_DIR
-
 sections = [
     {
         "id": "cover",
@@ -48,26 +37,22 @@ sections = [
         "chart_items": [
             {
                 "title": "Indexed trend",
-                "src": "charts/chart1.png",
-                "alt": "Indexed S&P and gas price trend",
+                "chart_id": "chart1",
                 "caption": "A long-view comparison of the indexed S&P 500 and gas prices over time.",
             },
             {
                 "title": "Yearly change",
-                "src": "charts/chart2.png",
-                "alt": "Yearly change lines for the S&P and gas",
+                "chart_id": "chart2",
                 "caption": "This view highlights the yearly percent change in both markets.",
             },
             {
                 "title": "Return scatter",
-                "src": "charts/chart4.png",
-                "alt": "Scatter plot of gas change and S&P return",
+                "chart_id": "chart4",
                 "caption": "A scatter view shows how annual returns cluster around gas-price movement.",
             },
             {
                 "title": "Event patterns",
-                "src": "charts/chart6.png",
-                "alt": "Pattern matrix for market behavior by event type",
+                "chart_id": "chart6",
                 "caption": "The event-pattern matrix shows how normal years and crises diverge.",
             },
         ],
@@ -91,20 +76,17 @@ sections = [
         "chart_items": [
             {
                 "title": "Return scatter",
-                "src": "charts/chart4.png",
-                "alt": "Annual S&P return versus gas price change",
+                "chart_id": "chart4",
                 "caption": "Annual S&P 500 returns compared with gas price changes.",
             },
             {
                 "title": "Yearly change",
-                "src": "charts/chart2.png",
-                "alt": "Yearly percent change for S&P 500 and gas prices",
+                "chart_id": "chart2",
                 "caption": "Yearly percent change trajectories for both markets.",
             },
             {
                 "title": "Indexed trend",
-                "src": "charts/chart1.png",
-                "alt": "Indexed S&P 500 and gas prices over time",
+                "chart_id": "chart1",
                 "caption": "A long-view comparison of the indexed series.",
             },
         ],
@@ -128,21 +110,18 @@ sections = [
         "chart_items": [
             {
                 "title": "Indexed trend",
-                "src": "charts/chart1.png",
-                "alt": "Indexed S&P 500 and gas prices over time",
+                "chart_id": "chart1",
                 "caption": "Indexed S&P 500 and gas prices show how each market moved through the same period.",
             },
             {
                 "title": "Yearly bars",
-                "src": "charts/chart3.png",
-                "alt": "Bar chart of yearly percent changes for S&P 500 and gas",
+                "chart_id": "chart3",
                 "caption": "Yearly percent change bars make the ups and downs easier to compare.",
             },
             {
-                "title": "Return scatter",
-                "src": "charts/chart4.png",
-                "alt": "Scatter plot linking gas change and S&P return",
-                "caption": "This view shows whether stronger returns cluster with larger gas swings.",
+                "title": "Event impact window",
+                "chart_id": "chart_event_window",
+                "caption": "Percent change in each market during a 1-12 month window after every major event since 2001, colored by event category.",
             },
         ],
     },
@@ -165,20 +144,17 @@ sections = [
         "chart_items": [
             {
                 "title": "Event patterns",
-                "src": "charts/chart6.png",
-                "alt": "Market patterns during normal years and crisis events",
+                "chart_id": "chart6",
                 "caption": "Crisis and normal-year market patterns reveal how the relationship shifts during major events.",
             },
             {
                 "title": "Indexed trend",
-                "src": "charts/chart1.png",
-                "alt": "Indexed S&P 500 and gas prices over time",
+                "chart_id": "chart1",
                 "caption": "The indexed trend shows how long-run trajectories deviate around shock periods.",
             },
             {
                 "title": "Return scatter",
-                "src": "charts/chart4.png",
-                "alt": "Scatter plot of gas change and S&P return",
+                "chart_id": "chart4",
                 "caption": "The scatter view helps separate normal years from crisis-years visually.",
             },
         ],
@@ -265,6 +241,165 @@ def load_analysis_data():
     }
 
 
+EVENT_CATEGORIES = {
+    "9/11 Terrorist Attacks": "Terror & Security",
+    "U.S. Invasion of Afghanistan (Operation Enduring Freedom)": "Geopolitical Conflict",
+    "Enron Scandal / Collapse": "Markets & Finance",
+    "SARS Outbreak": "Health Crisis",
+    "U.S. Invasion of Iraq (Operation Iraqi Freedom)": "Geopolitical Conflict",
+    "Hurricane Katrina": "Natural Disaster",
+    "U.S. Housing Market Crash Begins": "Economic Crisis",
+    "Bear Stearns Collapse": "Economic Crisis",
+    "Global Financial Crisis / Lehman Brothers Collapse": "Economic Crisis",
+    "TARP Bailout Passed": "Policy & Politics",
+    "European Sovereign Debt Crisis (Greece Bailout)": "Economic Crisis",
+    "Flash Crash": "Markets & Finance",
+    "Arab Spring Begins": "Geopolitical Conflict",
+    "Libyan Civil War / Oil Supply Disruption": "Energy & Supply Shock",
+    "Fukushima Nuclear Disaster / Japan Earthquake": "Natural Disaster",
+    "U.S./NATO Intervention in Libya (Operation Odyssey Dawn)": "Geopolitical Conflict",
+    "Killing of Osama bin Laden (Operation Neptune Spear)": "Terror & Security",
+    "U.S. Credit Rating Downgrade (S&P)": "Markets & Finance",
+    "Eurozone Crisis Escalation (Greek Debt Restructuring)": "Economic Crisis",
+    "Federal Reserve 'Taper Tantrum'": "Policy & Politics",
+    "Russia Annexation of Crimea": "Geopolitical Conflict",
+    "U.S. Military Intervention Against ISIS (Operation Inherent Resolve)": "Geopolitical Conflict",
+    "Oil Price Collapse (OPEC Supply Glut)": "Energy & Supply Shock",
+    "Chinese Stock Market Crash": "Markets & Finance",
+    "Brexit Referendum": "Policy & Politics",
+    "U.S. Presidential Election (Trump Win)": "Policy & Politics",
+    "U.S.-China Trade War Begins": "Policy & Politics",
+    "U.S. Stock Market Selloff (Q4)": "Markets & Finance",
+    "Killing of Qasem Soleimani / U.S.-Iran Tensions": "Geopolitical Conflict",
+    "OPEC+ Oil Price War (Saudi-Russia)": "Energy & Supply Shock",
+    "COVID-19 Pandemic Declared / Market Crash": "Health Crisis",
+    "U.S. Oil Futures Go Negative": "Energy & Supply Shock",
+    "COVID-19 Vaccine Rollout Begins": "Health Crisis",
+    "GameStop / Meme Stock Short Squeeze": "Markets & Finance",
+    "Suez Canal Blockage (Ever Given)": "Energy & Supply Shock",
+    "U.S. Withdrawal from Afghanistan": "Geopolitical Conflict",
+    "Russia Invades Ukraine": "Geopolitical Conflict",
+    "Federal Reserve Aggressive Rate Hikes Begin": "Policy & Politics",
+    "U.S. Inflation Peaks at 40-Year High": "Economic Crisis",
+    "Silicon Valley Bank Collapse": "Markets & Finance",
+    "Credit Suisse Collapse / Forced UBS Merger": "Markets & Finance",
+    "OPEC+ Surprise Production Cuts": "Energy & Supply Shock",
+    "U.S. Debt Ceiling Crisis": "Policy & Politics",
+    "Israel-Hamas War Begins": "Geopolitical Conflict",
+    "Red Sea Shipping Crisis (Houthi Attacks)": "Energy & Supply Shock",
+    "U.S. Airstrikes on Houthi Targets in Yemen (Operation Poseidon Archer)": "Geopolitical Conflict",
+    "Israel-Iran Conflict Escalation": "Geopolitical Conflict",
+    "Federal Reserve Begins Rate Cuts": "Policy & Politics",
+    "DeepSeek AI Shock to Tech Stocks": "Markets & Finance",
+    "U.S. Tariff Announcements ('Liberation Day' Tariffs)": "Policy & Politics",
+    "U.S. Strikes on Iranian Nuclear Facilities (Operation Midnight Hammer)": "Geopolitical Conflict",
+}
+
+EVENT_WINDOW_MONTHS = list(range(1, 13))
+
+
+def load_event_window_data() -> pd.DataFrame:
+    """For every event in the Major Global Events file, compute the percent
+    change in S&P 500 close and CA gas price over a 1-12 month window
+    starting at the event's start date, using the monthly market data."""
+    base_path = os.path.dirname(__file__)
+    events_file = os.path.join(base_path, "Major_Global_Events_2001_Present (1).xlsx")
+    market_file = os.path.join(base_path, "SP500_GasPrices_Tableau_v3.xlsx")
+
+    events = pd.read_excel(events_file, sheet_name="Global Events", engine="openpyxl")
+    events = events.dropna(subset=["Event Name", "Start Date"])
+    events["Start Date"] = pd.to_datetime(events["Start Date"])
+    events["Category"] = events["Event Name"].map(EVENT_CATEGORIES).fillna("Other")
+
+    monthly = pd.read_excel(market_file, sheet_name="Monthly_Data", engine="openpyxl")
+    monthly = monthly.rename(columns={
+        "S&P 500 Close": "SP_Close",
+        "CA Gas Price ($/gal)": "Gas_Price",
+    })
+    monthly["Date"] = pd.to_datetime(monthly["Date"])
+    monthly = monthly.dropna(subset=["Date", "SP_Close", "Gas_Price"]).sort_values("Date")
+    max_date = monthly["Date"].max()
+
+    records = []
+    for _, ev in events.iterrows():
+        start = ev["Start Date"]
+        before_start = monthly[monthly["Date"] <= start]
+        start_row = before_start.iloc[-1] if not before_start.empty else monthly.iloc[0]
+
+        for window in EVENT_WINDOW_MONTHS:
+            window_end = min(start + pd.DateOffset(months=window), max_date)
+            before_end = monthly[monthly["Date"] <= window_end]
+            end_row = before_end.iloc[-1] if not before_end.empty else monthly.iloc[-1]
+
+            sp_change = (end_row["SP_Close"] / start_row["SP_Close"] - 1) * 100
+            gas_change = (end_row["Gas_Price"] / start_row["Gas_Price"] - 1) * 100
+
+            for market, pct_change in (("S&P 500", sp_change), ("Gas Price", gas_change)):
+                records.append({
+                    "Event": ev["Event Name"],
+                    "Category": ev["Category"],
+                    "Start Date": start,
+                    "Window": window,
+                    "Market": market,
+                    "Percent_Change": pct_change,
+                })
+
+    return pd.DataFrame(records)
+
+
+def make_chart_event_window(event_window: pd.DataFrame) -> alt.VConcatChart:
+    window_select = alt.selection_point(
+        fields=["Window"],
+        bind=alt.binding_select(options=EVENT_WINDOW_MONTHS, name="Months after event start: "),
+        value=6,
+    )
+
+    category_domain = sorted(event_window["Category"].unique())
+    color = alt.Color("Category:N", title="Event Category", scale=alt.Scale(domain=category_domain))
+    tooltip = [
+        "Event:N",
+        "Category:N",
+        alt.Tooltip("Start Date:T", format="%b %Y"),
+        "Window:O",
+        alt.Tooltip("Percent_Change:Q", format=".1f", title="Percent Change"),
+    ]
+
+    def market_panel(market_name: str, y_title: str, include_param: bool) -> alt.LayerChart:
+        base = alt.Chart(event_window).transform_filter(
+            alt.FieldEqualPredicate(field="Market", equal=market_name)
+        ).transform_filter(window_select)
+
+        rule = base.mark_rule(strokeWidth=1.5).encode(
+            x=alt.X("Start Date:T", title="Event Start Date"),
+            y=alt.Y("Percent_Change:Q", title=y_title),
+            y2=alt.Y2(datum=0),
+            color=color,
+            tooltip=tooltip,
+        )
+        if include_param:
+            rule = rule.add_params(window_select)
+
+        point = base.mark_circle(size=65, stroke="white", strokeWidth=0.5).encode(
+            x=alt.X("Start Date:T"),
+            y=alt.Y("Percent_Change:Q"),
+            color=color,
+            tooltip=tooltip,
+        )
+
+        return (rule + point).properties(
+            title=market_name,
+            width=850,
+            height=200,
+        )
+
+    sp_panel = market_panel("S&P 500", "S&P 500 Change (%)", include_param=True)
+    gas_panel = market_panel("Gas Price", "Gas Price Change (%)", include_param=False)
+
+    return alt.vconcat(sp_panel, gas_panel).properties(
+        title="Market Change in the Months Following Major Global Events",
+    ).resolve_scale(color="shared")
+
+
 def make_chart1(long_index: pd.DataFrame) -> alt.Chart:
     return alt.Chart(long_index).mark_line(point=True).encode(
         x=alt.X("Year:O", title="Year"),
@@ -273,8 +408,8 @@ def make_chart1(long_index: pd.DataFrame) -> alt.Chart:
         tooltip=["Year:O", "Type:N", alt.Tooltip("Index_Value:Q", format=".1f"), "Event:N"],
     ).properties(
         title="Indexed S&P 500 vs Gas Prices",
-        width=900,
-        height=420,
+        width=800,
+        height=400,
     )
 
 
@@ -286,8 +421,8 @@ def make_chart2(long_change: pd.DataFrame) -> alt.Chart:
         tooltip=["Year:O", "Type:N", alt.Tooltip("Percent_Change:Q", format=".1f"), "Event:N"],
     ).properties(
         title="Yearly Percent Change: S&P 500 vs Gas Prices",
-        width=900,
-        height=420,
+        width=800,
+        height=400,
     )
 
 
@@ -299,21 +434,21 @@ def make_chart3(long_change: pd.DataFrame) -> alt.Chart:
         tooltip=["Year:O", "Type:N", alt.Tooltip("Percent_Change:Q", format=".1f"), "Event:N"],
     ).properties(
         title="Bar Chart of Yearly Changes",
-        width=900,
-        height=420,
+        width=800,
+        height=400,
     )
 
 
 def make_chart4(annual: pd.DataFrame) -> alt.Chart:
-    return alt.Chart(annual).mark_circle(size=110).encode(
+    return alt.Chart(annual).mark_circle(size=100).encode(
         x=alt.X("Gas_Change:Q", title="Gas Price Change (%)"),
         y=alt.Y("SP_Return:Q", title="S&P 500 Return (%)"),
         color=alt.Color("Event:N", title="Event"),
         tooltip=["Year:O", "Event:N", alt.Tooltip("Gas_Change:Q", format=".1f"), alt.Tooltip("SP_Return:Q", format=".1f")],
     ).properties(
         title="S&P 500 Return vs Gas Price Change",
-        width=760,
-        height=420,
+        width=650,
+        height=450,
     )
 
 
@@ -325,43 +460,34 @@ def make_chart6(pattern_counts: pd.DataFrame) -> alt.Chart:
         tooltip=["Event:N", "Pattern:N", "Count:Q"],
     ).properties(
         title="Market Patterns by Event Type",
-        width=900,
-        height=420,
+        width=750,
+        height=350,
     )
 
 
-def generate_charts() -> None:
-    os.makedirs(CHART_DIR, exist_ok=True)
-    data = load_analysis_data()
+def build_chart_specs() -> dict:
+    """Build the Vega-Lite specs for each chart so the browser can render the
+    actual Altair charts (via vega-embed) instead of static chart images."""
     alt.data_transformers.disable_max_rows()
-    chart_map = {
-        "chart1.png": make_chart1(data["long_index"]),
-        "chart2.png": make_chart2(data["long_change"]),
-        "chart3.png": make_chart3(data["long_change"]),
-        "chart4.png": make_chart4(data["annual"]),
-        "chart6.png": make_chart6(data["pattern_counts"]),
+    data = load_analysis_data()
+    event_window = load_event_window_data()
+    chart_builders = {
+        "chart1": make_chart1(data["long_index"]),
+        "chart2": make_chart2(data["long_change"]),
+        "chart3": make_chart3(data["long_change"]),
+        "chart4": make_chart4(data["annual"]),
+        "chart6": make_chart6(data["pattern_counts"]),
+        "chart_event_window": make_chart_event_window(event_window),
     }
-
-    for file_name, chart in chart_map.items():
-        output_path = os.path.join(CHART_DIR, file_name)
-        if not os.path.exists(output_path):
-            chart.save(output_path)
+    return {chart_id: chart.to_dict() for chart_id, chart in chart_builders.items()}
 
 
-def ensure_charts() -> None:
-    if not os.path.exists(CHART_DIR):
-        os.makedirs(CHART_DIR, exist_ok=True)
-    missing = [name for name in CHART_FILES.values() if not os.path.exists(os.path.join(CHART_DIR, name))]
-    if missing:
-        generate_charts()
-
-
-ensure_charts()
+CHART_SPECS = build_chart_specs()
 
 
 @app.route('/')
 def w209():
-    return render_template('w209.html', sections=sections)
+    return render_template('w209.html', sections=sections, chart_specs=CHART_SPECS)
 
 
 if __name__ == '__main__':

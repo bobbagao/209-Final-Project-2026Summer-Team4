@@ -4,5 +4,3 @@ numpy
 altair
 openpyxl
 xlrd
-vl-convert-python
-altair_saver

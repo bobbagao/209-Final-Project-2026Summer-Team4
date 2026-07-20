@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
   </head>
   <body>
     <aside class="side-nav" aria-label="Section navigation">
@@ -84,15 +87,14 @@
                 class="explorer-btn{% if loop.first %} active{% endif %}"
                 data-title="{{ item.title }}"
                 data-caption="{{ item.caption }}"
-                data-image="{{ url_for('static', filename=item.src) }}"
-                data-alt="{{ item.alt }}"
+                data-chart="{{ item.chart_id }}"
               >
                 <span>{{ item.title }}</span>
               </button>
               {% endfor %}
             </div>
             <div class="explorer-visual">
-              <img class="explorer-main-image" src="{{ url_for('static', filename=section.chart_items[0].src) }}" alt="{{ section.chart_items[0].alt }}" />
+              <div class="explorer-main-image vega-chart" data-chart="{{ section.chart_items[0].chart_id }}"></div>
               <div class="explorer-meta">
                 <h3 class="explorer-card-title">{{ section.chart_items[0].title }}</h3>
                 <p class="explorer-card-caption">{{ section.chart_items[0].caption }}</p>
@@ -153,7 +155,10 @@
       {% endfor %}
     </main>
 
+    <script id="chart-specs" type="application/json">{{ chart_specs | tojson }}</script>
     <script>
+      const CHART_SPECS = JSON.parse(document.getElementById('chart-specs').textContent);
+
       const sideLinks = Array.from(document.querySelectorAll('.side-link'));
       const sections = Array.from(document.querySelectorAll('.panel'));
 
@@ -177,9 +182,19 @@
 
       sections.forEach((section) => observer.observe(section));
 
+      const embedChart = (container, chartId) => {
+        const spec = CHART_SPECS[chartId];
+        if (!spec) return;
+        vegaEmbed(container, spec, { actions: false, renderer: 'svg' }).catch(console.error);
+      };
+
+      document.querySelectorAll('.vega-chart').forEach((container) => {
+        embedChart(container, container.dataset.chart);
+      });
+
       document.querySelectorAll('.explorer-shell').forEach((shell) => {
         const buttons = Array.from(shell.querySelectorAll('.explorer-btn'));
-        const image = shell.querySelector('.explorer-main-image');
+        const visual = shell.querySelector('.explorer-main-image');
         const title = shell.querySelector('.explorer-card-title');
         const caption = shell.querySelector('.explorer-card-caption');
 
@@ -187,8 +202,7 @@
           button.addEventListener('click', () => {
             buttons.forEach((btn) => btn.classList.remove('active'));
             button.classList.add('active');
-            image.src = button.dataset.image;
-            image.alt = button.dataset.alt;
+            embedChart(visual, button.dataset.chart);
             title.textContent = button.dataset.title;
             caption.textContent = button.dataset.caption;
           });
