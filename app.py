@@ -4,6 +4,7 @@ from flask import Flask, render_template
 import pandas as pd
 import numpy as np
 import altair as alt
+from scipy.stats import fisher_exact
 
 app = Flask(__name__)
 
@@ -140,17 +141,16 @@ sections = [
         "title": "Does the normal link between gas prices and stocks hold up during a crisis?",
         "description": "In an average year, do gas prices and the S&P 500 move in the same direction? And does that really break down during a crisis? We split 25 years of data into two groups and compared how often each moved together. “Crisis years” are 2008-09 (Financial Crisis), 2020-21 (COVID), 2022 (Energy Shock), and 2023-25 (Recent Conflict/Geopolitical) — every other year since 2000 counts as “normal.”",
         "secondary_chart_id": "chart_crisis_timeline",
-        "chart_id": "chart_h3_split",
-        "chart_title": "Normal years vs. crisis years",
-        "chart_caption": "The colored strip above shows exactly which years fall into which category — hover any year for its classification. \"Crisis\" here means a broad, sustained, globally-recognized economic disruption (a recession, pandemic, energy shock, or major conflict), not just a bad headline, which is why most years are still \"normal.\" Below, each dot is one year, labeled by year and colored by whether gas and the S&P moved in the same direction that year.",
+        "chart_id": "chart_h3_combined",
+        "chart_caption": "The colored strip above shows exactly which years fall into which category — hover any year for its classification. \"Crisis\" here means a broad, sustained, globally-recognized economic disruption (a recession, pandemic, energy shock, or major conflict), not just a bad headline, which is why most years are still \"normal.\" The top chart below shows the actual percentages with a statistical significance test; the scatter shows every year at once — quadrant color tells you \"same\" from \"opposite\" directly, circles are normal years and diamonds are crisis years. Use the dropdown to isolate just normal or just crisis years, or click a point to label its year.",
         "finding": {
             "label": "The Finding",
-            "text": "Yes. Gas prices and the S&P 500 moved in the same direction about 72% of the time in normal years, but only 25% of the time during crisis years (2008-09, 2020-22, 2023-25) — a real, sizable break in the pattern.",
+            "text": "Yes. Gas prices and the S&P 500 moved in the same direction about 72% of the time in normal years, but only 25% of the time during crisis years (2008-09, 2020-22, 2023-25) — a real, sizable break in the pattern. A Fisher's exact test confirms this gap is unlikely to be chance (p = 0.038), even with as few crisis years as we have to work with.",
         },
         "metrics": [
             {"value": "72%", "label": "normal years moving together"},
             {"value": "25%", "label": "crisis years moving together"},
-            {"value": "Supported", "label": "crisis decoupling is real"},
+            {"value": "p = 0.038", "label": "statistically significant gap"},
         ],
         "next": {"id": "conclusion", "label": "See the full conclusion"},
     },
@@ -190,9 +190,14 @@ sections = [
                 "caption": "The same volatility data as a scatter — each dot is one event.",
             },
             {
-                "title": "Normal vs. crisis years",
+                "title": "Normal vs. crisis (split)",
                 "chart_id": "chart_h3_split",
                 "caption": "How often gas prices and the S&P 500 move together, normal years versus crisis years.",
+            },
+            {
+                "title": "Normal vs. crisis (combined)",
+                "chart_id": "chart_h3_combined",
+                "caption": "The same comparison as one combined scatter with quadrant coloring, plus a statistical significance test.",
             },
             {
                 "title": "Indexed trend",
@@ -804,6 +809,201 @@ def make_chart_h3_split(annual: pd.DataFrame) -> alt.HConcatChart:
     ).resolve_scale(color="shared")
 
 
+def compute_h3_significance(direction_data: pd.DataFrame) -> dict:
+    """Fisher's exact test + Wilson 95% confidence intervals comparing how
+    often normal vs. crisis years move in the same direction — tests
+    whether the gap we see could plausibly just be chance, given how few
+    years of data exist (only 8 crisis years total)."""
+
+    def wilson_ci(count: int, n: int, z: float = 1.96) -> tuple:
+        if n == 0:
+            return (0.0, 0.0)
+        phat = count / n
+        denom = 1 + z ** 2 / n
+        center = (phat + z ** 2 / (2 * n)) / denom
+        half = z * np.sqrt(phat * (1 - phat) / n + z ** 2 / (4 * n * n)) / denom
+        return (max(0.0, center - half) * 100, min(1.0, center + half) * 100)
+
+    normal = direction_data[direction_data["Group"] == "Normal Years"]
+    crisis = direction_data[direction_data["Group"] == "Crisis Years"]
+
+    normal_same = int((normal["Direction"] == "Same Direction").sum())
+    crisis_same = int((crisis["Direction"] == "Same Direction").sum())
+    normal_total = len(normal)
+    crisis_total = len(crisis)
+
+    _, p_value = fisher_exact([
+        [crisis_same, crisis_total - crisis_same],
+        [normal_same, normal_total - normal_same],
+    ])
+
+    return {
+        "normal_same": normal_same,
+        "normal_total": normal_total,
+        "crisis_same": crisis_same,
+        "crisis_total": crisis_total,
+        "normal_rate": normal_same / normal_total * 100,
+        "crisis_rate": crisis_same / crisis_total * 100,
+        "normal_ci": wilson_ci(normal_same, normal_total),
+        "crisis_ci": wilson_ci(crisis_same, crisis_total),
+        "p_value": p_value,
+    }
+
+
+def make_chart_h3_significance(stats: dict) -> alt.LayerChart:
+    """Point + 95% confidence interval comparison, so viewers see not just
+    the two percentages but how much uncertainty surrounds them given the
+    small sample — and whether the gap holds up statistically."""
+    summary = pd.DataFrame([
+        {
+            "Group": "Normal Years",
+            "Rate": stats["normal_rate"],
+            "CI_Low": stats["normal_ci"][0],
+            "CI_High": stats["normal_ci"][1],
+            "Label": f"{stats['normal_rate']:.0f}% ({stats['normal_same']}/{stats['normal_total']})",
+        },
+        {
+            "Group": "Crisis Years",
+            "Rate": stats["crisis_rate"],
+            "CI_Low": stats["crisis_ci"][0],
+            "CI_High": stats["crisis_ci"][1],
+            "Label": f"{stats['crisis_rate']:.0f}% ({stats['crisis_same']}/{stats['crisis_total']})",
+        },
+    ])
+
+    group_order = ["Normal Years", "Crisis Years"]
+    group_color = alt.Color(
+        "Group:N", title=None, legend=None,
+        scale=alt.Scale(domain=group_order, range=["#4C78A8", "#ffb66b"]),
+    )
+
+    fifty_rule = alt.Chart(pd.DataFrame({"z": [50]})).mark_rule(
+        color="#888", strokeDash=[5, 5], opacity=0.7
+    ).encode(x="z:Q")
+
+    ci_bars = alt.Chart(summary).mark_rule(strokeWidth=5).encode(
+        x=alt.X("CI_Low:Q", title="Years moving in the same direction (%)", scale=alt.Scale(domain=[0, 100])),
+        x2="CI_High:Q",
+        y=alt.Y("Group:N", title=None, sort=group_order),
+        color=group_color,
+    )
+
+    points = alt.Chart(summary).mark_point(filled=True, size=260, stroke="white", strokeWidth=1.5).encode(
+        x="Rate:Q",
+        y=alt.Y("Group:N", sort=group_order),
+        color=group_color,
+    )
+
+    labels = alt.Chart(summary).mark_text(align="left", dx=14, fontSize=13, fontWeight="bold", color="#f7efe4").encode(
+        x="Rate:Q",
+        y=alt.Y("Group:N", sort=group_order),
+        text="Label:N",
+    )
+
+    significance_note = (
+        f"statistically significant at the 5% level" if stats["p_value"] < 0.05
+        else "not statistically significant on its own"
+    )
+
+    return (fifty_rule + ci_bars + points + labels).properties(
+        title=alt.TitleParams(
+            text="How Often Did Gas and the S&P Move in the Same Direction?",
+            subtitle=[
+                "Dots show the actual rate; bars show the 95% confidence range given how few years of data exist.",
+                f"Fisher's exact test: p = {stats['p_value']:.3f} ({significance_note}).",
+            ],
+        ),
+        width="container",
+        height=150,
+    )
+
+
+def make_chart_h3_quadrant(annual: pd.DataFrame) -> alt.LayerChart:
+    """A single combined scatter (all years at once) instead of two
+    side-by-side panels: color-coded quadrant backgrounds label "same" vs.
+    "opposite" directly on the plot, and point shape (circle vs. diamond)
+    distinguishes normal from crisis years, so the question "do crisis-year
+    diamonds cluster in the red zones?" can be read in one glance."""
+    direction_data = prepare_direction_data(annual)
+    x_limit = max(10, np.ceil(direction_data["Gas_Change"].abs().max() / 5) * 5)
+    y_limit = max(10, np.ceil(direction_data["SP_Return"].abs().max() / 5) * 5)
+
+    direction_domain = ["Same Direction", "Opposite Direction"]
+    direction_range = ["#59A14F", "#E15759"]
+
+    quadrants = pd.DataFrame([
+        {"x1": 0, "x2": x_limit, "y1": 0, "y2": y_limit, "Quadrant": "Same Direction"},
+        {"x1": -x_limit, "x2": 0, "y1": -y_limit, "y2": 0, "Quadrant": "Same Direction"},
+        {"x1": -x_limit, "x2": 0, "y1": 0, "y2": y_limit, "Quadrant": "Opposite Direction"},
+        {"x1": 0, "x2": x_limit, "y1": -y_limit, "y2": 0, "Quadrant": "Opposite Direction"},
+    ])
+
+    quadrant_bg = alt.Chart(quadrants).mark_rect(opacity=0.08).encode(
+        x=alt.X("x1:Q", scale=alt.Scale(domain=[-x_limit, x_limit]), title="Gas Price Change (%)"),
+        x2="x2:Q",
+        y=alt.Y("y1:Q", scale=alt.Scale(domain=[-y_limit, y_limit]), title="S&P 500 Return (%)"),
+        y2="y2:Q",
+        color=alt.Color("Quadrant:N", scale=alt.Scale(domain=direction_domain, range=direction_range), legend=None),
+    )
+
+    zero_x = alt.Chart(pd.DataFrame({"z": [0]})).mark_rule(color="#ccc", strokeDash=[4, 4], opacity=0.6).encode(x="z:Q")
+    zero_y = alt.Chart(pd.DataFrame({"z": [0]})).mark_rule(color="#ccc", strokeDash=[4, 4], opacity=0.6).encode(y="z:Q")
+
+    year_select = alt.selection_point(fields=["Year"], on="click", clear="dblclick", empty=False)
+    view_group = alt.param(
+        name="ViewGroup",
+        value="All Years",
+        bind=alt.binding_select(options=["All Years", "Normal Years", "Crisis Years"], name="Show years: "),
+    )
+    view_filter = "ViewGroup == 'All Years' || datum.Group == ViewGroup"
+
+    points = alt.Chart(direction_data).transform_filter(view_filter).mark_point(filled=True, strokeWidth=1.5, stroke="white").encode(
+        x=alt.X("Gas_Change:Q", title="Gas Price Change (%)", scale=alt.Scale(domain=[-x_limit, x_limit])),
+        y=alt.Y("SP_Return:Q", title="S&P 500 Return (%)", scale=alt.Scale(domain=[-y_limit, y_limit])),
+        color=alt.Color("Direction:N", title="Movement", legend=alt.Legend(orient="bottom"), scale=alt.Scale(domain=direction_domain, range=direction_range)),
+        shape=alt.Shape("Group:N", title="Year Type", legend=alt.Legend(orient="bottom"), scale=alt.Scale(domain=["Normal Years", "Crisis Years"], range=["circle", "diamond"])),
+        size=alt.condition(year_select, alt.value(320), alt.value(160)),
+        tooltip=[
+            "Year:O", "Event:N", "Group:N",
+            alt.Tooltip("Gas_Change:Q", format="+.1f", title="Gas Price Change (%)"),
+            alt.Tooltip("SP_Return:Q", format="+.1f", title="S&P 500 Return (%)"),
+            "Direction:N",
+        ],
+    ).add_params(year_select, view_group)
+
+    selected_label = alt.Chart(direction_data).transform_filter(view_filter).transform_filter(year_select).mark_text(
+        align="left", dx=10, dy=-10, fontSize=12, fontWeight="bold", color="#f7efe4"
+    ).encode(
+        x=alt.X("Gas_Change:Q", scale=alt.Scale(domain=[-x_limit, x_limit])),
+        y=alt.Y("SP_Return:Q", scale=alt.Scale(domain=[-y_limit, y_limit])),
+        text="Year:O",
+    )
+
+    return (quadrant_bg + zero_x + zero_y + points + selected_label).resolve_scale(color="independent").properties(
+        title=alt.TitleParams(
+            text="How Did Gas Prices and the S&P 500 Move Each Year?",
+            subtitle=[
+                "Green quadrants = moved the same direction. Red quadrants = moved opposite.",
+                "Circles = normal years, diamonds = crisis years. Click a point to label its year.",
+            ],
+        ),
+        width="container",
+        height=460,
+    )
+
+
+def make_chart_h3_combined(annual: pd.DataFrame) -> alt.VConcatChart:
+    direction_data = prepare_direction_data(annual)
+    stats = compute_h3_significance(direction_data)
+
+    significance_chart = make_chart_h3_significance(stats)
+    quadrant_chart = make_chart_h3_quadrant(annual)
+
+    return alt.vconcat(significance_chart, quadrant_chart).properties(
+        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
+    )
+
+
 def make_chart_crisis_timeline(annual: pd.DataFrame) -> alt.Chart:
     """A single-row, color-coded strip showing exactly which years are
     classified as which kind of year, and why — so "crisis year" isn't an
@@ -851,6 +1051,7 @@ def build_chart_specs() -> dict:
         "chart_event_scatter": make_chart_event_scatter(event_window, correlations),
         "chart_h1_timeline": make_chart_h1_timeline(troughs["points"], troughs["spans"]),
         "chart_h3_split": make_chart_h3_split(data["annual"]),
+        "chart_h3_combined": make_chart_h3_combined(data["annual"]),
         "chart_crisis_timeline": make_chart_crisis_timeline(data["annual"]),
     }
     return {chart_id: chart.to_dict() for chart_id, chart in chart_builders.items()}
@@ -865,4 +1066,4 @@ def w209():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5010)))
