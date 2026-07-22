@@ -88,10 +88,30 @@
         </div>
         {% endif %}
 
+        {% if section.chart_items %}
+        <div class="explorer-shell hero-chart-panel">
+          <div class="explorer-picker" role="tablist" aria-label="Chart view selector">
+            {% for item in section.chart_items %}
+            <button
+              type="button"
+              class="explorer-btn{% if loop.first %} active{% endif %}"
+              data-title="{{ item.title }}"
+              data-caption="{{ item.caption }}"
+              data-chart="{{ item.chart_id }}"
+            >
+              <span>{{ item.title }}</span>
+            </button>
+            {% endfor %}
+          </div>
+          <div class="hero-chart-visual explorer-main-image vega-chart" data-chart="{{ section.chart_items[0].chart_id }}" data-aria-label="{{ section.chart_items[0].caption }}"></div>
+          <p class="hero-chart-caption explorer-card-caption">{{ section.chart_items[0].caption }}</p>
+        </div>
+        {% else %}
         <div class="hero-chart-panel">
           <div class="hero-chart-visual vega-chart" data-chart="{{ section.chart_id }}" data-aria-label="{{ section.finding.text if section.finding else section.chart_caption }}"></div>
           <p class="hero-chart-caption">{{ section.chart_caption }}</p>
         </div>
+        {% endif %}
 
         {% if section.finding %}
         <div class="finding-callout">
@@ -329,8 +349,8 @@
             visual.dataset.chart = button.dataset.chart;
             visual.dataset.ariaLabel = button.dataset.caption;
             embedChart(visual, button.dataset.chart);
-            title.textContent = button.dataset.title;
-            caption.textContent = button.dataset.caption;
+            if (title) title.textContent = button.dataset.title;
+            if (caption) caption.textContent = button.dataset.caption;
           });
         });
       });

@@ -66,9 +66,9 @@ sections = [
         "type": "hero",
         "eyebrow": "W209 • Data Visualization",
         "title": "Do Gas Prices Really Predict the Stock Market?",
-        "subtitle": "We tested three common assumptions about gas prices and the S&P 500 against 25 years of data. Two of them didn't hold up the way you'd expect.",
+        "subtitle": "We tested three common assumptions about gas prices and the S&P 500 against 25 years of data. One didn't hold up at all — the other two held up in ways you might not expect.",
         "summary": "Scroll through three questions, each answered by a single chart built to be read at a glance — then explore the full data yourself at the end.",
-        "stats": ["25 years of data", "3 testable questions", "2 overturned by the data"],
+        "stats": ["25 years of data", "3 testable questions", "1 flatly rejected"],
         "next": {"id": "introduction", "label": "Start the story"},
     },
     {
@@ -109,18 +109,27 @@ sections = [
         "type": "hypothesis",
         "eyebrow": "03 • Question 2",
         "title": "Do bigger stock market swings come with bigger gas-price swings?",
-        "description": "“Volatility” means the size of a price swing, regardless of direction — not whether the market went up or down. To compare S&P 500 volatility and gas price volatility fairly, we measure both the same way: the size of the change (up or down) in the months after every major event since 2001. Adjust the window below to see the relationship shift.",
-        "chart_id": "chart_event_window",
-        "chart_title": "Event impact window",
-        "chart_caption": "S&P 500 volatility (dots, colored by event category, with an orange trend line) and gas price volatility (blue bars) after every major event since 2001. Use the dropdown to change how many months out you're looking.",
+        "description": "“Volatility” means how much a price bounces around, not just where it ends up — a market that swings wildly but nets out flat is still volatile. We measure it the standard way: the spread (standard deviation) of monthly price changes during the months after every major event since 2001, for both markets, so they're directly comparable. Two views of the same data below — pick whichever makes the pattern clearer to you.",
+        "chart_items": [
+            {
+                "title": "Timeline view",
+                "chart_id": "chart_event_window",
+                "caption": "S&P 500 volatility (lollipops, colored by event category, left axis) and gas price volatility (bars, right axis) after every major event since 2001. Use the dropdown to change the window, or hit Play to watch it evolve.",
+            },
+            {
+                "title": "Scatter view",
+                "chart_id": "chart_event_scatter",
+                "caption": "The same data, plotted differently: each dot is one event, positioned by how volatile gas and the S&P were. An upward-sloping cluster means the two get volatile together.",
+            },
+        ],
         "finding": {
             "label": "The Finding",
-            "text": "Yes, but only in the near term. In the 1-6 months after a major event, more S&P volatility tends to line up with more gas-price volatility — peaking around 3 months out (r = +0.38). That relationship fades to almost nothing by 12 months out (r = +0.03).",
+            "text": "Yes — and it gets stronger the longer you look, not weaker. Two months after a major event, S&P and gas volatility show a weak positive relationship (r = +0.33); by twelve months out, that grows to a moderate one (r = +0.49). This matches a well-documented pattern in finance called volatility clustering: during sustained turbulent periods, volatility tends to show up across markets together, not just briefly.",
         },
         "metrics": [
-            {"value": "r = +0.38", "label": "S&P volatility vs. gas volatility, 3 months out"},
-            {"value": "Fades by 12mo", "label": "drops to r = +0.03 a year out"},
-            {"value": "Short-term only", "label": "volatility co-moves, but doesn't last"},
+            {"value": "r = +0.49", "label": "S&P vs. gas volatility, 12 months out"},
+            {"value": "r = +0.33", "label": "S&P vs. gas volatility, 2 months out"},
+            {"value": "Strengthens over time", "label": "the relationship builds, it doesn't fade"},
         ],
         "next": {"id": "hypothesis-3", "label": "Question 3: Do crises break the link?"},
     },
@@ -150,10 +159,10 @@ sections = [
         "type": "story",
         "eyebrow": "05 • Conclusion",
         "title": "What the data actually shows",
-        "description": "Testing three specific, falsifiable questions instead of assuming a single story produced three different answers: one hypothesis wasn't supported at all, one held up only in the short term before fading, and one held up strongly across the board. That mix is itself the finding — the gas-price/S&P relationship isn't one consistent story, and treating it as one would have been misleading.",
+        "description": "Testing three specific, falsifiable questions instead of assuming a single story produced three different answers: one hypothesis wasn't supported at all, and the other two were — but at very different strengths and for different reasons. That mix is itself the finding — the gas-price/S&P relationship isn't one consistent story, and treating it as one would have been misleading.",
         "highlights": [
             "Hypothesis 1 (gas leads stocks down): not supported — across four major downturns, the lead varied both ways.",
-            "Hypothesis 2 (high volatility pairs with high volatility): supported short-term — S&P and gas volatility move together for a few months after a major event, but that relationship fades to near-zero by the one-year mark.",
+            "Hypothesis 2 (high volatility pairs with high volatility): supported, and it builds over time — S&P and gas volatility move together more the longer you look after a major event, consistent with well-documented volatility clustering across markets.",
             "Hypothesis 3 (crises break the link): supported — normal years move together about three times more often than crisis years."
         ],
         "next": {"id": "chart-explorer", "label": "Explore the full data yourself"},
@@ -171,9 +180,14 @@ sections = [
                 "caption": "The month each market bottomed out during four major downturns.",
             },
             {
-                "title": "Event impact window",
+                "title": "Event volatility (timeline)",
                 "chart_id": "chart_event_window",
-                "caption": "S&P performance and gas volatility after every major event since 2001, with an adjustable time window.",
+                "caption": "S&P 500 and gas price volatility after every major event since 2001, with an adjustable time window.",
+            },
+            {
+                "title": "Event volatility (scatter)",
+                "chart_id": "chart_event_scatter",
+                "caption": "The same volatility data as a scatter — each dot is one event.",
             },
             {
                 "title": "Normal vs. crisis years",
@@ -326,7 +340,7 @@ EVENT_CATEGORIES = {
     "U.S. Strikes on Iranian Nuclear Facilities (Operation Midnight Hammer)": "Geopolitical Conflict",
 }
 
-EVENT_WINDOW_MONTHS = list(range(1, 13))
+EVENT_WINDOW_MONTHS = list(range(2, 13))
 
 
 def load_monthly_market_data() -> pd.DataFrame:
@@ -344,9 +358,12 @@ def load_monthly_market_data() -> pd.DataFrame:
 
 
 def load_event_window_data() -> pd.DataFrame:
-    """For every event in the Major Global Events file, compute the percent
-    change in S&P 500 close and CA gas price over a 1-12 month window
-    starting at the event's start date, using the monthly market data."""
+    """For every event in the Major Global Events file, compute the actual
+    volatility (standard deviation of monthly % returns, the textbook
+    definition — not just the size of the net move from start to end) of
+    the S&P 500 and CA gas price during a 2-12 month window starting at the
+    event's start date. Windows shorter than 2 months can't produce a
+    meaningful standard deviation, so 1 month is excluded."""
     base_path = os.path.dirname(__file__)
     events_file = os.path.join(base_path, "Major_Global_Events_2001_Present (1).xlsx")
 
@@ -356,48 +373,46 @@ def load_event_window_data() -> pd.DataFrame:
     events["Category"] = events["Event Name"].map(EVENT_CATEGORIES).fillna("Other")
 
     monthly = load_monthly_market_data()
-    max_date = monthly["Date"].max()
+    monthly["SP_MoM"] = monthly["SP_Close"].pct_change() * 100
+    monthly["Gas_MoM"] = monthly["Gas_Price"].pct_change() * 100
 
     records = []
     for _, ev in events.iterrows():
         start = ev["Start Date"]
-        before_start = monthly[monthly["Date"] <= start]
-        start_row = before_start.iloc[-1] if not before_start.empty else monthly.iloc[0]
 
         for window in EVENT_WINDOW_MONTHS:
-            window_end = min(start + pd.DateOffset(months=window), max_date)
-            before_end = monthly[monthly["Date"] <= window_end]
-            end_row = before_end.iloc[-1] if not before_end.empty else monthly.iloc[-1]
+            window_end = start + pd.DateOffset(months=window)
+            in_window = monthly[(monthly["Date"] > start) & (monthly["Date"] <= window_end)]
+            if len(in_window) < 2:
+                continue
 
-            sp_change = (end_row["SP_Close"] / start_row["SP_Close"] - 1) * 100
-            gas_change = (end_row["Gas_Price"] / start_row["Gas_Price"] - 1) * 100
+            sp_volatility = in_window["SP_MoM"].std()
+            gas_volatility = in_window["Gas_MoM"].std()
+            if pd.isna(sp_volatility) or pd.isna(gas_volatility):
+                continue
 
-            for market, pct_change in (("S&P 500", sp_change), ("Gas Price", gas_change)):
+            for market, volatility in (("S&P 500", sp_volatility), ("Gas Price", gas_volatility)):
                 records.append({
                     "Event": ev["Event Name"],
                     "Category": ev["Category"],
                     "Start Date": start,
                     "Window": window,
                     "Market": market,
-                    "Percent_Change": pct_change,
-                    # Volatility = size of the swing regardless of direction,
-                    # so both markets are measured the same way for a fair
-                    # comparison (a signed "performance" number isn't volatility).
-                    "Plot_Value": abs(pct_change),
+                    "Volatility": volatility,
                 })
 
     return pd.DataFrame(records)
 
 
 def compute_event_window_correlations(event_window: pd.DataFrame) -> pd.DataFrame:
-    """Correlation between S&P volatility and gas volatility (both measured
-    as magnitude of change, so the two are directly comparable) at each
+    """Correlation between S&P volatility and gas volatility (both the
+    standard-deviation-based measure, so directly comparable) at each
     window length, for the plain-language annotation under the chart."""
     records = []
     for window in EVENT_WINDOW_MONTHS:
         sub = event_window[event_window["Window"] == window]
-        pivoted = sub.pivot(index=["Event", "Start Date"], columns="Market", values="Percent_Change").dropna()
-        r = pivoted["S&P 500"].abs().corr(pivoted["Gas Price"].abs())
+        pivoted = sub.pivot(index=["Event", "Start Date"], columns="Market", values="Volatility").dropna()
+        r = pivoted["S&P 500"].corr(pivoted["Gas Price"])
         strength = "little to no" if abs(r) < 0.1 else ("a weak" if abs(r) < 0.3 else "a moderate")
         direction = "move together" if r > 0 else "move oppositely"
         label = f"At this window: S&P volatility and gas volatility show {strength} tendency to {direction} (r = {r:+.2f})"
@@ -485,9 +500,12 @@ def make_chart_h1_timeline(points: pd.DataFrame, spans: pd.DataFrame) -> alt.Lay
 
 
 def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFrame) -> alt.VConcatChart:
-    """One overlaid chart instead of two stacked panels: gas volatility as a
-    background histogram, S&P performance as colored dots with a smoothed
-    trend line on top, sharing a single time axis with a dual y-scale."""
+    """Timeline view: gas volatility as bars (right axis) and S&P volatility
+    as lollipops (left axis, zero-anchored to match the bars' visual
+    language) sharing one time axis, so viewers can compare whether tall
+    bars and tall lollipops tend to line up at the same events. No smoothed
+    trend line — it added visual weight without helping the actual
+    side-by-side comparison, which is the point of this view."""
     window_select = alt.selection_point(
         fields=["Window"],
         bind=alt.binding_select(options=EVENT_WINDOW_MONTHS, name="Months after event start: "),
@@ -506,7 +524,7 @@ def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFra
         "Category:N",
         alt.Tooltip("Start Date:T", format="%b %Y"),
         "Window:O",
-        alt.Tooltip("Percent_Change:Q", format=".1f", title="Actual Percent Change"),
+        alt.Tooltip("Volatility:Q", format=".1f", title="Volatility (std. dev. of monthly returns, %)"),
     ]
 
     base_gas = alt.Chart(event_window).transform_filter(
@@ -523,40 +541,43 @@ def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFra
     gas_bars = base_gas.mark_bar(opacity=0.35, color=gas_axis_color, size=5).encode(
         x=alt.X("Start Date:T", title="Event Start Date"),
         y=alt.Y(
-            "Plot_Value:Q",
+            "Volatility:Q",
             title="Gas Price Volatility (%)",
             axis=alt.Axis(orient="right", titleColor=gas_axis_color, labelColor=gas_axis_color),
         ),
         tooltip=tooltip,
     ).add_params(window_select)
 
-    sp_points = base_sp.mark_circle(size=70, stroke="white", strokeWidth=0.5).encode(
+    sp_rule = base_sp.mark_rule(strokeWidth=2).encode(
         x=alt.X("Start Date:T"),
         y=alt.Y(
-            "Plot_Value:Q",
+            "Volatility:Q",
             title="S&P 500 Volatility (%)",
             axis=alt.Axis(titleColor=sp_axis_color, labelColor=sp_axis_color),
         ),
+        y2=alt.Y2(datum=0),
         color=color,
         tooltip=tooltip,
     )
 
-    sp_trend = base_sp.transform_loess(
-        "Start Date", "Plot_Value", as_=["Start Date", "Smoothed"], bandwidth=0.3
-    ).mark_line(color=sp_axis_color, strokeWidth=3.5, interpolate="monotone").encode(
-        x="Start Date:T",
-        # No y-title here: this layer shares S&P 500's axis/scale with
-        # sp_points below (grouped in one sub-layer so Vega-Lite renders a
-        # single axis instead of one per layer, which was drawing the title
-        # twice).
-        y=alt.Y("Smoothed:Q", axis=None),
+    sp_point = base_sp.mark_circle(size=80, stroke="white", strokeWidth=0.6).encode(
+        x=alt.X("Start Date:T"),
+        # No y-title here: shares S&P 500's axis/scale with sp_rule above
+        # (grouped in one sub-layer so Vega-Lite renders a single axis
+        # instead of one per layer, which was drawing the title twice).
+        y=alt.Y("Volatility:Q", axis=None),
+        color=color,
+        tooltip=tooltip,
     )
 
-    sp_group = (sp_points + sp_trend)
+    sp_group = (sp_rule + sp_point)
     combined = (gas_bars + sp_group).resolve_scale(y="independent").properties(
         title=alt.TitleParams(
             text="S&P 500 Volatility (orange, left axis) vs. Gas Price Volatility (blue, right axis)",
-            subtitle=["Left axis = S&P 500 swing size. Right axis = gas price swing size. Both are % change, either direction."],
+            subtitle=[
+                "Volatility = standard deviation of monthly % returns during the selected window.",
+                "Left axis = S&P 500. Right axis = gas prices.",
+            ],
         ),
         width="container",
         height=420,
@@ -571,7 +592,80 @@ def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFra
     ).properties(width="container", height=30)
 
     return alt.vconcat(combined, annotation).properties(
-        title="S&P 500 Volatility vs. Gas Price Volatility After Major Events",
+        title="S&P 500 Volatility vs. Gas Price Volatility After Major Events — Timeline View",
+        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
+    )
+
+
+def make_chart_event_scatter(event_window: pd.DataFrame, correlations: pd.DataFrame) -> alt.VConcatChart:
+    """Scatter view of the same volatility data: one dot per event, gas
+    volatility on the x-axis and S&P volatility on the y-axis, both on the
+    same shared plane (no dual axes to reconcile). An upward-sloping cluster
+    means the two tend to get volatile together; a fitted trend line makes
+    that slope explicit."""
+    window_select = alt.selection_point(
+        fields=["Window"],
+        bind=alt.binding_select(options=EVENT_WINDOW_MONTHS, name="Months after event start: "),
+        value=6,
+    )
+
+    wide = event_window.pivot(
+        index=["Event", "Category", "Start Date", "Window"], columns="Market", values="Volatility"
+    ).reset_index()
+    wide = wide.rename(columns={"S&P 500": "SP_Volatility", "Gas Price": "Gas_Volatility"})
+    wide = wide.dropna(subset=["SP_Volatility", "Gas_Volatility"])
+
+    category_domain = sorted(wide["Category"].unique())
+    color = alt.Color(
+        "Category:N",
+        title="Event Category",
+        legend=alt.Legend(orient="bottom", columns=2, labelLimit=160, symbolLimit=20),
+        scale=alt.Scale(domain=category_domain),
+    )
+    tooltip = [
+        "Event:N",
+        "Category:N",
+        alt.Tooltip("Start Date:T", format="%b %Y"),
+        "Window:O",
+        alt.Tooltip("Gas_Volatility:Q", format=".1f", title="Gas Price Volatility (%)"),
+        alt.Tooltip("SP_Volatility:Q", format=".1f", title="S&P 500 Volatility (%)"),
+    ]
+
+    base = alt.Chart(wide).transform_filter(window_select)
+
+    points = base.mark_circle(size=140, stroke="white", strokeWidth=0.6).encode(
+        x=alt.X("Gas_Volatility:Q", title="Gas Price Volatility (%)"),
+        y=alt.Y("SP_Volatility:Q", title="S&P 500 Volatility (%)"),
+        color=color,
+        tooltip=tooltip,
+    ).add_params(window_select)
+
+    trend = base.transform_regression("Gas_Volatility", "SP_Volatility").mark_line(
+        color="#ffb66b", strokeWidth=3, strokeDash=[6, 3]
+    ).encode(
+        x="Gas_Volatility:Q",
+        y="SP_Volatility:Q",
+    )
+
+    combined = (points + trend).properties(
+        title=alt.TitleParams(
+            text="S&P 500 Volatility vs. Gas Price Volatility, by Event",
+            subtitle=["Each dot is one event. An upward-sloping cluster means the two tend to get volatile together."],
+        ),
+        width="container",
+        height=460,
+    )
+
+    annotation = alt.Chart(correlations).transform_filter(window_select).mark_text(
+        fontSize=13,
+        fontStyle="italic",
+        color="#aab4c2",
+    ).encode(
+        text="Label:N",
+    ).properties(width="container", height=30)
+
+    return alt.vconcat(combined, annotation).properties(
+        title="S&P 500 Volatility vs. Gas Price Volatility After Major Events — Scatter View",
         autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
     )
 
@@ -754,6 +848,7 @@ def build_chart_specs() -> dict:
         "chart4": make_chart4(data["annual"]),
         "chart6": make_chart6(data["pattern_counts"]),
         "chart_event_window": make_chart_event_window(event_window, correlations),
+        "chart_event_scatter": make_chart_event_scatter(event_window, correlations),
         "chart_h1_timeline": make_chart_h1_timeline(troughs["points"], troughs["spans"]),
         "chart_h3_split": make_chart_h3_split(data["annual"]),
         "chart_crisis_timeline": make_chart_crisis_timeline(data["annual"]),
