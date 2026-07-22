@@ -67,7 +67,7 @@ sections = [
         "type": "hero",
         "eyebrow": "W209 • Data Visualization",
         "title": "Do Gas Prices Really Predict the Stock Market?",
-        "subtitle": "We tested three common assumptions about gas prices and the S&P 500 against 25 years of data. One didn't hold up at all — the other two held up in ways you might not expect.",
+        "subtitle": "We tested three common assumptions about gas prices and the S&P 500 against 25 years of data. The results were a mixed bag — one didn't hold up, one held up in a way we didn't expect, and one we simply don't have enough data to confirm.",
         "summary": "Scroll through three questions, each answered by a single chart built to be read at a glance — then explore the full data yourself at the end.",
         "stats": ["25 years of data", "3 testable questions", "1 flatly rejected"],
         "next": {"id": "introduction", "label": "Start the story"},
@@ -111,7 +111,7 @@ sections = [
         ],
         "finding": {
             "label": "The Finding",
-            "text": "No. In 2 of 4 downturns, gas bottomed out first; in the other 2, the S&P 500 did. The gap ranges from 2 to 9 months, with no consistent pattern in which market leads.",
+            "text": "No. In 2 of 4 downturns, gas bottomed out first; in the other 2, the S&P 500 did. The gap ranges from 2 to 9 months, with no consistent pattern in which market leads. Worth flagging: this is a small sample (only 4 major downturns exist in 25 years), and the exact trough dates are read off month-end prices, which can miss the true day-to-day low by a few weeks — but even allowing for that uncertainty, there's no visible sign of a reliable pattern either way.",
         },
         "metrics": [
             {"value": "2 of 4", "label": "downturns where gas dipped first"},
@@ -140,12 +140,12 @@ sections = [
         ],
         "finding": {
             "label": "The Finding",
-            "text": "Yes — and it gets stronger the longer you look, not weaker. Two months after a major event, S&P and gas volatility show a weak positive relationship (r = +0.33); by twelve months out, that grows to a moderate one (r = +0.49). This matches a well-documented pattern in finance called volatility clustering: during sustained turbulent periods, volatility tends to show up across markets together, not just briefly.",
+            "text": "Yes, moderately — S&P and gas volatility do move together (r = +0.33 to +0.49, depending on the window). But the fact that this looks stronger at longer windows almost certainly isn't because the relationship deepens over time: shorter windows compute volatility from just 2-3 monthly data points, a noisy estimate that understates any real relationship, while longer windows average over more data and give a more reliable read. The most trustworthy number here is the 12-month figure, r = +0.49, simply because it's based on the most data per event.",
         },
         "metrics": [
-            {"value": "r = +0.49", "label": "S&P vs. gas volatility, 12 months out"},
-            {"value": "r = +0.33", "label": "S&P vs. gas volatility, 2 months out"},
-            {"value": "Strengthens over time", "label": "the relationship builds, it doesn't fade"},
+            {"value": "r = +0.49", "label": "most reliable estimate, at 12 months"},
+            {"value": "r = +0.33", "label": "noisiest estimate, at 2 months"},
+            {"value": "Moderate", "label": "a real relationship, not a strong one"},
         ],
         "next": {"id": "hypothesis-3", "label": "Question 3: Do crises break the link?"},
     },
@@ -154,18 +154,18 @@ sections = [
         "type": "hypothesis",
         "eyebrow": "04 • Question 3",
         "title": "Does the normal link between gas prices and stocks hold up during a crisis?",
-        "description": "In an average year, do gas prices and the S&P 500 move in the same direction? And does that really break down during a crisis? We split 25 years of data into two groups and compared how often each moved together. “Crisis years” are 2008-09 (Financial Crisis), 2020-21 (COVID), 2022 (Energy Shock), and 2023-25 (Recent Conflict/Geopolitical) — every other year since 2000 counts as “normal.”",
+        "description": "In an average year, do gas prices and the S&P 500 move in the same direction? And does that really break down during a crisis? To keep \"crisis\" consistent with Hypothesis 1 instead of picking a separate list, a year counts as a crisis year here only if it falls between when gas and the S&P actually bottomed out during one of the same four downturns from Question 1 (the Dot-Com Crash, the 2008 Financial Crisis, COVID-19, and the 2022 selloff). That gives 7 crisis years and 19 normal years, which we compared.",
         "secondary_chart_id": "chart_crisis_timeline",
         "chart_id": "chart_h3_combined",
-        "chart_caption": "The colored strip above shows exactly which years fall into which category — hover any year for its classification. \"Crisis\" here means a broad, sustained, globally-recognized economic disruption (a recession, pandemic, energy shock, or major conflict), not just a bad headline, which is why most years are still \"normal.\" The top chart below shows the actual percentages with a statistical significance test; the scatter shows every year at once — quadrant color tells you \"same\" from \"opposite\" directly, circles are normal years and diamonds are crisis years. Use the dropdown to isolate just normal or just crisis years, or click a point to label its year.",
+        "chart_caption": "The colored strip above shows exactly which years fall into which category, using the same downturn windows as Question 1 — hover any year for its classification. The top chart below shows the actual percentages with a statistical significance test; the scatter shows every year at once — quadrant color tells you \"same\" from \"opposite\" directly, circles are normal years and diamonds are crisis years. Use the dropdown to isolate just normal or just crisis years, or click a point to label its year.",
         "finding": {
             "label": "The Finding",
-            "text": "Yes. Gas prices and the S&P 500 moved in the same direction about 72% of the time in normal years, but only 25% of the time during crisis years (2008-09, 2020-22, 2023-25) — a real, sizable break in the pattern. A Fisher's exact test confirms this gap is unlikely to be chance (p = 0.038), even with as few crisis years as we have to work with.",
+            "text": "Inconclusive. Normal years moved in the same direction 63% of the time versus 43% in crisis years (2001-02, 2008-09, 2020, 2022-23) — a real gap in the raw numbers, and in the direction the hypothesis predicts. But with only 7 crisis years to work with, a Fisher's exact test can't rule out that this gap is just chance (p = 0.41). We can't confidently say the pattern breaks down during a crisis — only that it might, and we don't have enough data yet to tell.",
         },
         "metrics": [
-            {"value": "72%", "label": "normal years moving together"},
-            {"value": "25%", "label": "crisis years moving together"},
-            {"value": "p = 0.038", "label": "statistically significant gap"},
+            {"value": "63%", "label": "normal years moving together"},
+            {"value": "43%", "label": "crisis years moving together"},
+            {"value": "p = 0.41", "label": "not statistically significant"},
         ],
         "next": {"id": "conclusion", "label": "See the full conclusion"},
     },
@@ -174,11 +174,11 @@ sections = [
         "type": "story",
         "eyebrow": "05 • Conclusion",
         "title": "What the data actually shows",
-        "description": "Testing three specific, falsifiable questions instead of assuming a single story produced three different answers: one hypothesis wasn't supported at all, and the other two were — but at very different strengths and for different reasons. That mix is itself the finding — the gas-price/S&P relationship isn't one consistent story, and treating it as one would have been misleading.",
+        "description": "Testing three specific, falsifiable questions instead of assuming a single story produced three genuinely different answers: one hypothesis wasn't supported, one was supported in a way we didn't expect, and one we simply can't confirm with the data available. That mix is itself the finding — the gas-price/S&P relationship isn't one consistent story, and treating it as one (or claiming more certainty than the data actually supports) would have been misleading.",
         "highlights": [
             "Hypothesis 1 (gas leads stocks down): not supported — across four major downturns, the lead varied both ways.",
-            "Hypothesis 2 (high volatility pairs with high volatility): supported, and it builds over time — S&P and gas volatility move together more the longer you look after a major event, consistent with well-documented volatility clustering across markets.",
-            "Hypothesis 3 (crises break the link): supported — normal years move together about three times more often than crisis years."
+            "Hypothesis 2 (high volatility pairs with high volatility): supported, moderately — S&P and gas volatility move together (r = +0.33 to +0.49 depending on the window), most reliably measured using longer windows, which average over more data and are less noisy.",
+            "Hypothesis 3 (crises break the link): inconclusive — normal years moved together more often than crisis years (63% vs. 43%), using a crisis-year definition kept consistent with Hypothesis 1, but with only 7 crisis years to work with, that gap isn't statistically significant (p = 0.41)."
         ],
         "next": {"id": "chart-explorer", "label": "Explore the full data yourself"},
     },
@@ -230,15 +230,10 @@ sections = [
 
 
 def event_group(year: int) -> str:
-    if year in [2008, 2009]:
-        return "Financial Crisis"
-    if year in [2020, 2021]:
-        return "COVID"
-    if year == 2022:
-        return "Energy Shock"
-    if year in [2023, 2024, 2025]:
-        return "Recent Conflict"
-    return "Normal Year"
+    """A year's classification, derived from CRISIS_YEAR_MAP (see
+    compute_crisis_years) so this matches Hypothesis 1's downturn episodes
+    exactly instead of using a separately hand-picked list."""
+    return CRISIS_YEAR_MAP.get(year, "Normal Year")
 
 
 def load_analysis_data():
@@ -471,6 +466,25 @@ def load_downturn_trough_data() -> dict:
         })
 
     return {"points": pd.DataFrame(points), "spans": pd.DataFrame(spans)}
+
+
+def compute_crisis_years() -> dict:
+    """Which calendar years count as a "crisis year" (for Hypothesis 3 and
+    the classification strip), derived directly from the same downturn
+    episodes and empirically-found trough dates used in Hypothesis 1 —
+    a year counts if it falls between when gas and the S&P actually
+    bottomed out for that episode. This replaces a separate, hand-picked
+    crisis-year list so every hypothesis uses one consistent definition of
+    "crisis" instead of two different, unreconciled ones."""
+    spans = load_downturn_trough_data()["spans"]
+    year_map = {}
+    for _, row in spans.iterrows():
+        for year in range(row["start_date"].year, row["end_date"].year + 1):
+            year_map[year] = row["Episode"]
+    return year_map
+
+
+CRISIS_YEAR_MAP = compute_crisis_years()
 
 
 def make_chart_h1_timeline(points: pd.DataFrame, spans: pd.DataFrame) -> alt.LayerChart:
@@ -1021,8 +1035,8 @@ def make_chart_crisis_timeline(annual: pd.DataFrame) -> alt.Chart:
         title="Year Classification",
         legend=alt.Legend(orient="bottom", columns=3),
         scale=alt.Scale(
-            domain=["Normal Year", "Financial Crisis", "COVID", "Energy Shock", "Recent Conflict"],
-            range=["#3a4a63", "#E15759", "#4C78A8", "#ffb66b", "#8E6C8A"],
+            domain=["Normal Year", "Dot-Com Crash", "Financial Crisis", "COVID-19 Crash", "2022 Selloff"],
+            range=["#3a4a63", "#8E6C8A", "#E15759", "#4C78A8", "#ffb66b"],
         ),
     )
 
