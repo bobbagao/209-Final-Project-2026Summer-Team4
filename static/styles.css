@@ -301,6 +301,17 @@ a { color: inherit; text-decoration: none; }
   min-height: 260px;
 }
 
+.hero-chart-panel-secondary {
+  margin-top: 0;
+  margin-bottom: -8px;
+}
+
+.hero-chart-visual-secondary {
+  min-height: auto;
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: none;
+}
+
 .hero-chart-visual .vega-embed {
   width: 100%;
   display: flex;

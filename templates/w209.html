@@ -82,6 +82,12 @@
           <p class="section-copy">{{ section.description }}</p>
         </div>
 
+        {% if section.secondary_chart_id %}
+        <div class="hero-chart-panel hero-chart-panel-secondary">
+          <div class="hero-chart-visual hero-chart-visual-secondary vega-chart" data-chart="{{ section.secondary_chart_id }}"></div>
+        </div>
+        {% endif %}
+
         <div class="hero-chart-panel">
           <div class="hero-chart-visual vega-chart" data-chart="{{ section.chart_id }}"></div>
           <p class="hero-chart-caption">{{ section.chart_caption }}</p>

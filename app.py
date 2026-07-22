@@ -108,19 +108,19 @@ sections = [
         "id": "hypothesis-2",
         "type": "hypothesis",
         "eyebrow": "03 • Question 2",
-        "title": "Do bigger stock market gains come with bigger gas-price swings?",
-        "description": "We tested this using every major event since 2001, measuring how much the S&P 500 changed and how much gas prices swung (in either direction) in the months that followed. Adjust the window below to see the relationship shift.",
+        "title": "Do bigger stock market swings come with bigger gas-price swings?",
+        "description": "“Volatility” means the size of a price swing, regardless of direction — not whether the market went up or down. To compare S&P 500 volatility and gas price volatility fairly, we measure both the same way: the size of the change (up or down) in the months after every major event since 2001. Adjust the window below to see the relationship shift.",
         "chart_id": "chart_event_window",
         "chart_title": "Event impact window",
-        "chart_caption": "S&P performance and gas volatility after every major event since 2001. Use the dropdown to change how many months out you're looking.",
+        "chart_caption": "S&P 500 volatility (dots, colored by event category, with an orange trend line) and gas price volatility (blue bars) after every major event since 2001. Use the dropdown to change how many months out you're looking.",
         "finding": {
             "label": "The Finding",
-            "text": "The opposite of what was predicted. In the 3-9 months after a major event, stronger S&P performance tends to line up with calmer gas prices, not wilder ones — a real but moderate relationship.",
+            "text": "Yes, but only in the near term. In the 1-6 months after a major event, more S&P volatility tends to line up with more gas-price volatility — peaking around 3 months out (r = +0.38). That relationship fades to almost nothing by 12 months out (r = +0.03).",
         },
         "metrics": [
-            {"value": "r ≈ −0.4", "label": "S&P gains vs. gas volatility, 6 months out"},
-            {"value": "Inverse", "label": "opposite of the original hypothesis"},
-            {"value": "Moderate", "label": "real, but not a dominant effect"},
+            {"value": "r = +0.38", "label": "S&P volatility vs. gas volatility, 3 months out"},
+            {"value": "Fades by 12mo", "label": "drops to r = +0.03 a year out"},
+            {"value": "Short-term only", "label": "volatility co-moves, but doesn't last"},
         ],
         "next": {"id": "hypothesis-3", "label": "Question 3: Do crises break the link?"},
     },
@@ -129,10 +129,11 @@ sections = [
         "type": "hypothesis",
         "eyebrow": "04 • Question 3",
         "title": "Does the normal link between gas prices and stocks hold up during a crisis?",
-        "description": "In an average year, do gas prices and the S&P 500 move in the same direction? And does that really break down during a crisis? We split 25 years of data into normal years and crisis years and compared how often each group moved together.",
+        "description": "In an average year, do gas prices and the S&P 500 move in the same direction? And does that really break down during a crisis? We split 25 years of data into two groups and compared how often each moved together. “Crisis years” are 2008-09 (Financial Crisis), 2020-21 (COVID), 2022 (Energy Shock), and 2023-25 (Recent Conflict/Geopolitical) — every other year since 2000 counts as “normal.”",
+        "secondary_chart_id": "chart_crisis_timeline",
         "chart_id": "chart_h3_split",
         "chart_title": "Normal years vs. crisis years",
-        "chart_caption": "Side-by-side comparison of how often gas prices and the S&P 500 move in the same direction.",
+        "chart_caption": "The colored strip above shows exactly which years fall into which category — hover any year for its classification. \"Crisis\" here means a broad, sustained, globally-recognized economic disruption (a recession, pandemic, energy shock, or major conflict), not just a bad headline, which is why most years are still \"normal.\" Below, each dot is one year, labeled by year and colored by whether gas and the S&P moved in the same direction that year.",
         "finding": {
             "label": "The Finding",
             "text": "Yes. Gas prices and the S&P 500 moved in the same direction about 72% of the time in normal years, but only 25% of the time during crisis years (2008-09, 2020-22, 2023-25) — a real, sizable break in the pattern.",
@@ -149,10 +150,10 @@ sections = [
         "type": "story",
         "eyebrow": "05 • Conclusion",
         "title": "What the data actually shows",
-        "description": "Testing three specific, falsifiable questions instead of assuming a single story produced three different answers: one hypothesis wasn't supported, one held in a direction we didn't expect, and one held up strongly. That mix is itself the finding — the gas-price/S&P relationship isn't one consistent story, and treating it as one would have been misleading.",
+        "description": "Testing three specific, falsifiable questions instead of assuming a single story produced three different answers: one hypothesis wasn't supported at all, one held up only in the short term before fading, and one held up strongly across the board. That mix is itself the finding — the gas-price/S&P relationship isn't one consistent story, and treating it as one would have been misleading.",
         "highlights": [
             "Hypothesis 1 (gas leads stocks down): not supported — across four major downturns, the lead varied both ways.",
-            "Hypothesis 2 (high performance means high gas volatility): the opposite was found — calmer gas prices tend to line up with stronger S&P performance.",
+            "Hypothesis 2 (high volatility pairs with high volatility): supported short-term — S&P and gas volatility move together for a few months after a major event, but that relationship fades to near-zero by the one-year mark.",
             "Hypothesis 3 (crises break the link): supported — normal years move together about three times more often than crisis years."
         ],
         "next": {"id": "chart-explorer", "label": "Explore the full data yourself"},
@@ -379,25 +380,27 @@ def load_event_window_data() -> pd.DataFrame:
                     "Window": window,
                     "Market": market,
                     "Percent_Change": pct_change,
-                    # S&P is plotted as signed performance; gas is plotted as
-                    # volatility (magnitude of swing, regardless of direction).
-                    "Plot_Value": pct_change if market == "S&P 500" else abs(pct_change),
+                    # Volatility = size of the swing regardless of direction,
+                    # so both markets are measured the same way for a fair
+                    # comparison (a signed "performance" number isn't volatility).
+                    "Plot_Value": abs(pct_change),
                 })
 
     return pd.DataFrame(records)
 
 
 def compute_event_window_correlations(event_window: pd.DataFrame) -> pd.DataFrame:
-    """Correlation between S&P performance (signed) and gas volatility
-    (magnitude of change) at each window length, for the plain-language
-    annotation under the event-window chart."""
+    """Correlation between S&P volatility and gas volatility (both measured
+    as magnitude of change, so the two are directly comparable) at each
+    window length, for the plain-language annotation under the chart."""
     records = []
     for window in EVENT_WINDOW_MONTHS:
         sub = event_window[event_window["Window"] == window]
         pivoted = sub.pivot(index=["Event", "Start Date"], columns="Market", values="Percent_Change").dropna()
-        r = pivoted["S&P 500"].corr(pivoted["Gas Price"].abs())
-        direction = "calmer" if r < 0 else "more volatile"
-        label = f"At this window: stronger S&P performance tends to pair with {direction} gas prices (r = {r:+.2f})"
+        r = pivoted["S&P 500"].abs().corr(pivoted["Gas Price"].abs())
+        strength = "little to no" if abs(r) < 0.1 else ("a weak" if abs(r) < 0.3 else "a moderate")
+        direction = "move together" if r > 0 else "move oppositely"
+        label = f"At this window: S&P volatility and gas volatility show {strength} tendency to {direction} (r = {r:+.2f})"
         records.append({"Window": window, "Correlation": r, "Label": label})
     return pd.DataFrame(records)
 
@@ -482,6 +485,9 @@ def make_chart_h1_timeline(points: pd.DataFrame, spans: pd.DataFrame) -> alt.Lay
 
 
 def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFrame) -> alt.VConcatChart:
+    """One overlaid chart instead of two stacked panels: gas volatility as a
+    background histogram, S&P performance as colored dots with a smoothed
+    trend line on top, sharing a single time axis with a dual y-scale."""
     window_select = alt.selection_point(
         fields=["Window"],
         bind=alt.binding_select(options=EVENT_WINDOW_MONTHS, name="Months after event start: "),
@@ -503,36 +509,44 @@ def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFra
         alt.Tooltip("Percent_Change:Q", format=".1f", title="Actual Percent Change"),
     ]
 
-    def market_panel(market_name: str, panel_title: str, y_title: str, include_param: bool) -> alt.LayerChart:
-        base = alt.Chart(event_window).transform_filter(
-            alt.FieldEqualPredicate(field="Market", equal=market_name)
-        ).transform_filter(window_select)
+    base_gas = alt.Chart(event_window).transform_filter(
+        alt.FieldEqualPredicate(field="Market", equal="Gas Price")
+    ).transform_filter(window_select)
 
-        rule = base.mark_rule(strokeWidth=1.5).encode(
-            x=alt.X("Start Date:T", title="Event Start Date"),
-            y=alt.Y("Plot_Value:Q", title=y_title),
-            y2=alt.Y2(datum=0),
-            color=color,
-            tooltip=tooltip,
-        )
-        if include_param:
-            rule = rule.add_params(window_select)
+    base_sp = alt.Chart(event_window).transform_filter(
+        alt.FieldEqualPredicate(field="Market", equal="S&P 500")
+    ).transform_filter(window_select)
 
-        point = base.mark_circle(size=65, stroke="white", strokeWidth=0.5).encode(
-            x=alt.X("Start Date:T"),
-            y=alt.Y("Plot_Value:Q"),
-            color=color,
-            tooltip=tooltip,
-        )
+    gas_bars = base_gas.mark_bar(opacity=0.35, color="#4C78A8", size=5).encode(
+        x=alt.X("Start Date:T", title="Event Start Date"),
+        y=alt.Y("Plot_Value:Q", title="Gas Price Volatility (%)", axis=alt.Axis(orient="right")),
+        tooltip=tooltip,
+    ).add_params(window_select)
 
-        return (rule + point).properties(
-            title=panel_title,
-            width="container",
-            height=230,
-        )
+    sp_points = base_sp.mark_circle(size=70, stroke="white", strokeWidth=0.5).encode(
+        x=alt.X("Start Date:T"),
+        y=alt.Y("Plot_Value:Q", title="S&P 500 Volatility (%)"),
+        color=color,
+        tooltip=tooltip,
+    )
 
-    sp_panel = market_panel("S&P 500", "S&P 500 Performance", "S&P 500 Change (%)", include_param=True)
-    gas_panel = market_panel("Gas Price", "Gas Price Volatility", "Gas Price Swing, Either Direction (%)", include_param=False)
+    sp_trend = base_sp.transform_loess(
+        "Start Date", "Plot_Value", as_=["Start Date", "Smoothed"], bandwidth=0.3
+    ).mark_line(color="#ffb66b", strokeWidth=3.5, interpolate="monotone").encode(
+        x="Start Date:T",
+        # No y-title here: this layer shares S&P 500's axis/scale with
+        # sp_points below (grouped in one sub-layer so Vega-Lite renders a
+        # single axis instead of one per layer, which was drawing the title
+        # twice).
+        y=alt.Y("Smoothed:Q", axis=None),
+    )
+
+    sp_group = (sp_points + sp_trend)
+    combined = (gas_bars + sp_group).resolve_scale(y="independent").properties(
+        title="S&P 500 Volatility (line + dots) vs. Gas Price Volatility (bars)",
+        width="container",
+        height=420,
+    )
 
     annotation = alt.Chart(correlations).transform_filter(window_select).mark_text(
         fontSize=13,
@@ -542,10 +556,10 @@ def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFra
         text="Label:N",
     ).properties(width="container", height=30)
 
-    return alt.vconcat(sp_panel, gas_panel, annotation).properties(
-        title="S&P 500 Performance vs. Gas Price Volatility After Major Events",
+    return alt.vconcat(combined, annotation).properties(
+        title="S&P 500 Volatility vs. Gas Price Volatility After Major Events",
         autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
-    ).resolve_scale(color="shared")
+    )
 
 
 def make_chart1(long_index: pd.DataFrame) -> alt.Chart:
@@ -644,6 +658,7 @@ def make_chart_h3_split(annual: pd.DataFrame) -> alt.HConcatChart:
     def group_panel(group_name: str) -> alt.LayerChart:
         sub = direction_data[direction_data["Group"] == group_name]
         pct_together = (sub["Direction"] == "Same Direction").mean() * 100
+        year_list = ", ".join(str(y) for y in sorted(sub["Year"].tolist()))
 
         base = alt.Chart(sub)
         zero_x = alt.Chart(pd.DataFrame({"z": [0]})).mark_rule(color="#ccc", strokeDash=[4, 4]).encode(x="z:Q")
@@ -654,14 +669,23 @@ def make_chart_h3_split(annual: pd.DataFrame) -> alt.HConcatChart:
             color=direction_color,
             tooltip=tooltip,
         )
+        labels = base.mark_text(dy=-14, fontSize=9.5, color="#f7efe4").encode(
+            x=alt.X("Gas_Change:Q", scale=alt.Scale(domain=[-45, 45])),
+            y=alt.Y("SP_Return:Q", scale=alt.Scale(domain=[-45, 45])),
+            text=alt.Text("Year:O"),
+        )
 
-        return (zero_x + zero_y + points).properties(
+        return (zero_x + zero_y + points + labels).properties(
             title=alt.TitleParams(
                 text=group_name,
-                subtitle=[f"{pct_together:.0f}% of years moved in the same direction"],
+                subtitle=[
+                    f"{pct_together:.0f}% of years moved in the same direction",
+                    f"Years: {year_list}",
+                ],
+                subtitleFontSize=10.5,
             ),
             width="container",
-            height=420,
+            height=440,
         )
 
     return alt.hconcat(
@@ -670,6 +694,35 @@ def make_chart_h3_split(annual: pd.DataFrame) -> alt.HConcatChart:
     ).properties(
         title="Do Gas Prices and the S&P 500 Move Together? Normal Years vs. Crisis Years",
     ).resolve_scale(color="shared")
+
+
+def make_chart_crisis_timeline(annual: pd.DataFrame) -> alt.Chart:
+    """A single-row, color-coded strip showing exactly which years are
+    classified as which kind of year, and why — so "crisis year" isn't an
+    unexplained label attached to the chart below."""
+    strip_data = annual.copy()
+    strip_data["Row"] = "Classification"
+
+    event_color = alt.Color(
+        "Event:N",
+        title="Year Classification",
+        legend=alt.Legend(orient="bottom", columns=3),
+        scale=alt.Scale(
+            domain=["Normal Year", "Financial Crisis", "COVID", "Energy Shock", "Recent Conflict"],
+            range=["#3a4a63", "#E15759", "#4C78A8", "#ffb66b", "#8E6C8A"],
+        ),
+    )
+
+    return alt.Chart(strip_data).mark_rect(stroke="#0b1427", strokeWidth=1.5).encode(
+        x=alt.X("Year:O", title=None),
+        y=alt.Y("Row:N", title=None, axis=None),
+        color=event_color,
+        tooltip=["Year:O", alt.Tooltip("Event:N", title="Classification")],
+    ).properties(
+        title="Which Years Count as a \"Crisis\" Year, and Why",
+        width="container",
+        height=60,
+    )
 
 
 def build_chart_specs() -> dict:
@@ -689,6 +742,7 @@ def build_chart_specs() -> dict:
         "chart_event_window": make_chart_event_window(event_window, correlations),
         "chart_h1_timeline": make_chart_h1_timeline(troughs["points"], troughs["spans"]),
         "chart_h3_split": make_chart_h3_split(data["annual"]),
+        "chart_crisis_timeline": make_chart_crisis_timeline(data["annual"]),
     }
     return {chart_id: chart.to_dict() for chart_id, chart in chart_builders.items()}
 
