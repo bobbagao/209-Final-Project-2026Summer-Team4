@@ -89,11 +89,26 @@ sections = [
         "id": "hypothesis-1",
         "type": "hypothesis",
         "eyebrow": "02 • Question 1",
-        "title": "Does a gas-price dip really happen before a stock-market dip?",
         "description": "The original idea: falling gas prices act as an early warning sign for a stock market downturn. Annual averages can't show monthly timing, so instead we found the exact month each major downturn bottomed out in both markets and compared the dates directly.",
-        "chart_id": "chart_h1_timeline",
-        "chart_title": "Who dipped first?",
-        "chart_caption": "The month each market bottomed out during four major downturns — no consistent leader emerges.",
+        "chart_items": [
+            {
+                "title": "Indexed trend",
+                "chart_id": "chart1",
+                "caption": "A long-view comparison of the indexed S&P 500 and gas prices over time.",
+            },
+            {
+                "title": "Yearly change",
+                "chart_id": "chart2",
+                "caption": "Year-by-year percent change for both markets.",
+            },
+            {        
+                "title": "Does a gas-price dip really happen before a stock-market dip?",
+                "chart_id": "chart_h1_timeline",
+                "chart_caption": "The month each market bottomed out during four major downturns — no consistent leader emerges.",
+
+            },
+
+        ],
         "finding": {
             "label": "The Finding",
             "text": "No. In 2 of 4 downturns, gas bottomed out first; in the other 2, the S&P 500 did. The gap ranges from 2 to 9 months, with no consistent pattern in which market leads.",
@@ -198,16 +213,6 @@ sections = [
                 "title": "Normal vs. crisis (combined)",
                 "chart_id": "chart_h3_combined",
                 "caption": "The same comparison as one combined scatter with quadrant coloring, plus a statistical significance test.",
-            },
-            {
-                "title": "Indexed trend",
-                "chart_id": "chart1",
-                "caption": "A long-view comparison of the indexed S&P 500 and gas prices over time.",
-            },
-            {
-                "title": "Yearly change",
-                "chart_id": "chart2",
-                "caption": "Year-by-year percent change for both markets.",
             },
             {
                 "title": "Yearly bars",
