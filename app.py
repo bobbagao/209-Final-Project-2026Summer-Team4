@@ -256,7 +256,7 @@ def load_analysis_data():
     annual["Pattern"] = annual["SP_Direction"] + " / " + annual["Gas_Direction"]
 
     long_index = annual.melt(
-        id_vars=["Year", "Date", "Event"],
+        id_vars=["Year", "Date", "Event", "Gas_Price"],
         value_vars=["SP_Index", "Gas_Index"],
         var_name="Type",
         value_name="Index_Value",
@@ -909,12 +909,32 @@ def make_chart_event_scatter(event_window: pd.DataFrame, correlations: pd.DataFr
 
 
 def make_chart1(long_index: pd.DataFrame) -> alt.Chart:
-    return alt.Chart(long_index).mark_line(point=True).encode(
+    base = alt.Chart(long_index)
+    series_colors = alt.Scale(domain=["S&P 500", "Gas Prices"], range=["#ffb66b", "#4C78A8"])
+
+    sp500 = base.transform_filter(
+        {"field": "Type", "equal": "S&P 500"}
+    ).mark_line(point=True).encode(
         x=alt.X("Year:O", title="Year"),
-        y=alt.Y("Index_Value:Q", title="Index Value"),
-        color=alt.Color("Type:N", title="Series", legend=alt.Legend(orient="bottom")),
+        y=alt.Y("Index_Value:Q", title="S&P 500 index"),
+        color=alt.Color("Type:N", title="Series", scale=series_colors, legend=alt.Legend(orient="bottom")),
         tooltip=["Year:O", "Type:N", alt.Tooltip("Index_Value:Q", format=".1f"), "Event:N"],
-    ).properties(
+    )
+
+    gas = base.transform_filter(
+        {"field": "Type", "equal": "Gas Prices"}
+    ).mark_line(point=True).encode(
+        x=alt.X("Year:O", title="Year"),
+        y=alt.Y(
+            "Gas_Price:Q",
+            title="Gas price ($/gallon)",
+            axis=alt.Axis(orient="right"),
+        ),
+        color=alt.Color("Type:N", title="Series", scale=series_colors, legend=None),
+        tooltip=["Year:O", "Type:N", alt.Tooltip("Gas_Price:Q", title="Gas price ($/gallon)", format=".2f"), "Event:N"],
+    )
+
+    return (sp500 + gas).resolve_scale(y="independent").properties(
         title="Indexed S&P 500 vs Gas Prices",
         width="container",
         height=420,
