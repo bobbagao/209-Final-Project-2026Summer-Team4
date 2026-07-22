@@ -517,22 +517,33 @@ def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFra
         alt.FieldEqualPredicate(field="Market", equal="S&P 500")
     ).transform_filter(window_select)
 
-    gas_bars = base_gas.mark_bar(opacity=0.35, color="#4C78A8", size=5).encode(
+    sp_axis_color = "#ffb66b"
+    gas_axis_color = "#4C78A8"
+
+    gas_bars = base_gas.mark_bar(opacity=0.35, color=gas_axis_color, size=5).encode(
         x=alt.X("Start Date:T", title="Event Start Date"),
-        y=alt.Y("Plot_Value:Q", title="Gas Price Volatility (%)", axis=alt.Axis(orient="right")),
+        y=alt.Y(
+            "Plot_Value:Q",
+            title="Gas Price Volatility (%)",
+            axis=alt.Axis(orient="right", titleColor=gas_axis_color, labelColor=gas_axis_color),
+        ),
         tooltip=tooltip,
     ).add_params(window_select)
 
     sp_points = base_sp.mark_circle(size=70, stroke="white", strokeWidth=0.5).encode(
         x=alt.X("Start Date:T"),
-        y=alt.Y("Plot_Value:Q", title="S&P 500 Volatility (%)"),
+        y=alt.Y(
+            "Plot_Value:Q",
+            title="S&P 500 Volatility (%)",
+            axis=alt.Axis(titleColor=sp_axis_color, labelColor=sp_axis_color),
+        ),
         color=color,
         tooltip=tooltip,
     )
 
     sp_trend = base_sp.transform_loess(
         "Start Date", "Plot_Value", as_=["Start Date", "Smoothed"], bandwidth=0.3
-    ).mark_line(color="#ffb66b", strokeWidth=3.5, interpolate="monotone").encode(
+    ).mark_line(color=sp_axis_color, strokeWidth=3.5, interpolate="monotone").encode(
         x="Start Date:T",
         # No y-title here: this layer shares S&P 500's axis/scale with
         # sp_points below (grouped in one sub-layer so Vega-Lite renders a
@@ -543,7 +554,10 @@ def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFra
 
     sp_group = (sp_points + sp_trend)
     combined = (gas_bars + sp_group).resolve_scale(y="independent").properties(
-        title="S&P 500 Volatility (line + dots) vs. Gas Price Volatility (bars)",
+        title=alt.TitleParams(
+            text="S&P 500 Volatility (orange, left axis) vs. Gas Price Volatility (blue, right axis)",
+            subtitle=["Left axis = S&P 500 swing size. Right axis = gas price swing size. Both are % change, either direction."],
+        ),
         width="container",
         height=420,
     )

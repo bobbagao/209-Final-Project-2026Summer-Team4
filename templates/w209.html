@@ -84,12 +84,12 @@
 
         {% if section.secondary_chart_id %}
         <div class="hero-chart-panel hero-chart-panel-secondary">
-          <div class="hero-chart-visual hero-chart-visual-secondary vega-chart" data-chart="{{ section.secondary_chart_id }}"></div>
+          <div class="hero-chart-visual hero-chart-visual-secondary vega-chart" data-chart="{{ section.secondary_chart_id }}" data-aria-label="A color-coded strip showing which years are classified as normal versus which kind of crisis."></div>
         </div>
         {% endif %}
 
         <div class="hero-chart-panel">
-          <div class="hero-chart-visual vega-chart" data-chart="{{ section.chart_id }}"></div>
+          <div class="hero-chart-visual vega-chart" data-chart="{{ section.chart_id }}" data-aria-label="{{ section.finding.text if section.finding else section.chart_caption }}"></div>
           <p class="hero-chart-caption">{{ section.chart_caption }}</p>
         </div>
 
@@ -139,7 +139,7 @@
               {% endfor %}
             </div>
             <div class="explorer-visual">
-              <div class="explorer-main-image vega-chart" data-chart="{{ section.chart_items[0].chart_id }}"></div>
+              <div class="explorer-main-image vega-chart" data-chart="{{ section.chart_items[0].chart_id }}" data-aria-label="{{ section.chart_items[0].caption }}"></div>
               <div class="explorer-meta">
                 <h3 class="explorer-card-title">{{ section.chart_items[0].title }}</h3>
                 <p class="explorer-card-caption">{{ section.chart_items[0].caption }}</p>
@@ -252,10 +252,64 @@
       window.addEventListener('scroll', updateProgress, { passive: true });
       updateProgress();
 
+      // Vega-Lite has no built-in tweening between filtered data states, but
+      // a bound dropdown (like the "months after event" selector) can be
+      // stepped through automatically to get the same effect: this finds
+      // any <select> vega-embed renders inside a chart container and adds a
+      // "Play" button that walks through its options on a timer. Works for
+      // any current or future chart with a bound dropdown, not just one.
+      const setupPlayButton = (container) => {
+        const select = container.querySelector('select');
+        if (!select || select.dataset.playButtonAdded) return;
+        select.dataset.playButtonAdded = 'true';
+
+        const row = select.closest('.vega-bind') || select.parentElement;
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'play-btn';
+        playBtn.textContent = '▶ Play';
+        row.appendChild(playBtn);
+
+        let playing = false;
+        playBtn.addEventListener('click', () => {
+          if (playing) return;
+          playing = true;
+          playBtn.textContent = 'Playing…';
+          playBtn.disabled = true;
+
+          const options = Array.from(select.options).map((o) => o.value);
+          let i = 0;
+          const step = () => {
+            select.value = options[i];
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            i += 1;
+            if (i >= options.length) {
+              playing = false;
+              playBtn.textContent = '▶ Play Again';
+              playBtn.disabled = false;
+              return;
+            }
+            setTimeout(step, 650);
+          };
+          step();
+        });
+      };
+
       const embedChart = (container, chartId) => {
         const spec = CHART_SPECS[chartId];
         if (!spec) return;
-        vegaEmbed(container, spec, { actions: false, renderer: 'svg' }).catch(console.error);
+        vegaEmbed(container, spec, { actions: false, renderer: 'svg' })
+          .then(() => {
+            setupPlayButton(container);
+            // vega-embed sets its own generic aria-label ("Vega
+            // visualization") on the container after rendering, overwriting
+            // anything set beforehand — so re-apply the real description
+            // (usually the chart's finding, in plain language) afterward.
+            if (container.dataset.ariaLabel) {
+              container.setAttribute('aria-label', container.dataset.ariaLabel);
+            }
+          })
+          .catch(console.error);
       };
 
       document.querySelectorAll('.vega-chart').forEach((container) => {
@@ -273,6 +327,7 @@
             buttons.forEach((btn) => btn.classList.remove('active'));
             button.classList.add('active');
             visual.dataset.chart = button.dataset.chart;
+            visual.dataset.ariaLabel = button.dataset.caption;
             embedChart(visual, button.dataset.chart);
             title.textContent = button.dataset.title;
             caption.textContent = button.dataset.caption;
