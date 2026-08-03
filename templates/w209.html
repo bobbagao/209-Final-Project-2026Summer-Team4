@@ -8,9 +8,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='event_impact_map.css') }}" />
     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="{{ url_for('static', filename='event_impact_map.js') }}" defer></script>
   </head>
   <body>
     <aside class="side-nav" aria-label="Section navigation">
@@ -78,16 +81,58 @@
         <div class="section-meta">
           <p class="eyebrow">{{ section.eyebrow }}</p>
           <h2>{{ section.title }}</h2>
-          <p class="section-copy">{{ section.description }}</p>
+          <p class="section-copy">{{ section.description | safe }}</p>
         </div>
 
-        {% if section.secondary_chart_id %}
-        <div class="hero-chart-panel hero-chart-panel-secondary">
-          <div class="hero-chart-visual hero-chart-visual-secondary vega-chart" data-chart="{{ section.secondary_chart_id }}" data-aria-label="A color-coded strip showing which years are classified as normal versus which kind of crisis."></div>
+        {% if section.id == 'hypothesis-2' %}
+        <div class="linked-panel">
+          <div class="hero-chart-panel">
+            <div class="hero-chart-caption vega-chart-manual" id="h2-readout" data-chart="chart_h2_readout"></div>
+            <div class="hero-chart-visual vega-chart-manual" id="h2-scatter" data-chart="chart_h2_scatter" data-aria-label="{{ section.finding.text }}"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="h2-event-select">Highlight event:</label>
+            <select id="h2-event-select">
+              <option value="All years">All years</option>
+              {% for ev in h2_event_options %}
+              <option value="{{ ev }}">{{ ev }}</option>
+              {% endfor %}
+            </select>
+            <label for="h2-year-min-select">From year:</label>
+            <select id="h2-year-min-select">
+              {% for yr in h2_years %}
+              <option value="{{ yr }}"{% if loop.first %} selected{% endif %}>{{ yr }}</option>
+              {% endfor %}
+            </select>
+            <label for="h2-year-max-select">To year:</label>
+            <select id="h2-year-max-select">
+              {% for yr in h2_years %}
+              <option value="{{ yr }}"{% if loop.last %} selected{% endif %}>{{ yr }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="hero-chart-panel">
+            <div class="hero-chart-visual vega-chart-manual" id="h2-timeline" data-chart="chart_h2_timeline"></div>
+          </div>
         </div>
-        {% endif %}
+        <p class="hero-chart-caption">{{ section.chart_caption }}</p>
 
-        {% if section.chart_items %}
+        {% elif section.id == 'hypothesis-3' %}
+        <div class="linked-panel">
+          <div class="hero-chart-visual hero-chart-visual-secondary vega-chart-manual" id="h3-strip" data-chart="chart_crisis_timeline" data-aria-label="A color-coded strip showing which years are classified as normal versus which kind of crisis."></div>
+          <div class="dropdown-row">
+            <label for="h3-group-select">Show years:</label>
+            <select id="h3-group-select">
+              <option value="All Years">All Years</option>
+              <option value="Normal Years">Normal Years</option>
+              <option value="Crisis Years">Crisis Years</option>
+            </select>
+          </div>
+          <div class="hero-chart-visual vega-chart-manual" id="h3-quadrant" data-chart="chart_h3_quadrant" data-aria-label="{{ section.finding.text }}"></div>
+        </div>
+        <p class="hero-chart-caption">{{ section.chart_caption }}</p>
+
+        {% elif section.chart_items %}
         <div class="explorer-shell hero-chart-panel">
           <div class="explorer-picker" role="tablist" aria-label="Chart view selector">
             {% for item in section.chart_items %}
@@ -115,8 +160,15 @@
         {% if section.finding %}
         <div class="finding-callout">
           <span class="finding-label">{{ section.finding.label }}</span>
-          <p>{{ section.finding.text }}</p>
+          <p>{{ section.finding.text | safe }}</p>
         </div>
+        {% endif %}
+
+        {% if section.technical_details %}
+        <details class="tech-details">
+          <summary>Technical details (p-value, confidence intervals)</summary>
+          <p>{{ section.technical_details }}</p>
+        </details>
         {% endif %}
 
         {% if section.metrics %}
@@ -159,6 +211,49 @@
             </div>
             <div class="explorer-visual">
               <div class="explorer-main-image vega-chart" data-chart="{{ section.chart_items[0].chart_id }}" data-aria-label="{{ section.chart_items[0].caption }}"></div>
+
+              <div id="event-impact-app" class="event-impact-panel" hidden>
+                <div class="topbar">
+                  <div>
+                    <p class="brand-eyebrow">Event Impact Map</p>
+                    <h1>Which shocks moved the market most?</h1>
+                    <p class="sub">Each tile is a major global event since 2001. Tile size = magnitude of % change following the event; color = direction. Adjust the window to see how impact compounds or fades over time.</p>
+                  </div>
+                  <div class="controls">
+                    <div class="seg" id="metric-seg">
+                      <button type="button" data-metric="sp500" class="active">S&amp;P 500 (pts)</button>
+                      <button type="button" data-metric="gas">CA Gas Price ($/gal)</button>
+                    </div>
+                    <div class="window-ctrl">
+                      <span>WINDOW</span>
+                      <input type="range" id="window-slider" min="1" max="12" step="1" value="3" />
+                      <b id="window-val">3 months</b>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="chart-wrap">
+                  <div id="chart-meta">
+                    <span class="metric-label" id="metric-label">S&amp;P 500 &mdash; net point movement, event date &rarr; +3 months</span>
+                    <div id="legend">
+                      <div class="legend-item"><span class="swatch" style="background:var(--up)"></span>Gained</div>
+                      <div class="legend-item"><span class="swatch" style="background:var(--down)"></span>Lost</div>
+                    </div>
+                  </div>
+                  <svg id="chart"></svg>
+                  <p class="empty-note" id="empty-note" style="display:none">No events fall within a window that has complete data at this setting.</p>
+                </div>
+
+                <footer>
+                  Sources: event list &mdash; user-provided "Major Global Events 2001&ndash;Present" (52 events) &middot;
+                  S&amp;P 500 monthly close &mdash; Robert Shiller dataset (via GitHub: datasets/s-and-p-500) &middot;
+                  CA all-grades retail gasoline price &mdash; U.S. EIA series EMM_EPM0_PTE_SCA_DPG, monthly.
+                  Net movement = value at (event month + N) &minus; value at event month, using each series' own monthly cadence. Not investment advice.
+                </footer>
+
+                <div id="tooltip"></div>
+              </div>
+
               <div class="explorer-meta">
                 <h3 class="explorer-card-title">{{ section.chart_items[0].title }}</h3>
                 <p class="explorer-card-caption">{{ section.chart_items[0].caption }}</p>
@@ -338,6 +433,7 @@
       document.querySelectorAll('.explorer-shell').forEach((shell) => {
         const buttons = Array.from(shell.querySelectorAll('.explorer-btn'));
         const visual = shell.querySelector('.explorer-main-image');
+        const impactPanel = shell.querySelector('#event-impact-app');
         const title = shell.querySelector('.explorer-card-title');
         const caption = shell.querySelector('.explorer-card-caption');
 
@@ -345,14 +441,101 @@
           button.addEventListener('click', () => {
             buttons.forEach((btn) => btn.classList.remove('active'));
             button.classList.add('active');
-            visual.dataset.chart = button.dataset.chart;
-            visual.dataset.ariaLabel = button.dataset.caption;
-            embedChart(visual, button.dataset.chart);
+            const isImpactMap = button.dataset.chart === 'event_impact_map';
+
+            if (isImpactMap && impactPanel) {
+              visual.hidden = true;
+              impactPanel.hidden = false;
+              if (window.initEventImpactMap) window.initEventImpactMap();
+              requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+            } else {
+              if (impactPanel) impactPanel.hidden = true;
+              visual.hidden = false;
+              visual.dataset.chart = button.dataset.chart;
+              visual.dataset.ariaLabel = button.dataset.caption;
+              embedChart(visual, button.dataset.chart);
+            }
+
             if (title) title.textContent = button.dataset.title;
             if (caption) caption.textContent = button.dataset.caption;
           });
         });
       });
+
+      // H2/H3 use a hand-authored <select> (not Vega-Lite's auto-rendered
+      // binding) so it can sit visually between two independently-mounted
+      // chart views instead of below everything. embedChartView resolves
+      // with the vega-embed result so we can reach into each view's signal
+      // API and keep the two mounts in sync.
+      const embedChartView = (container, chartId) => {
+        const spec = CHART_SPECS[chartId];
+        if (!container || !spec) return Promise.resolve(null);
+        return vegaEmbed(container, spec, { actions: false, renderer: 'svg' })
+          .then((result) => {
+            if (container.dataset.ariaLabel) container.setAttribute('aria-label', container.dataset.ariaLabel);
+            return result;
+          })
+          .catch((err) => { console.error(err); return null; });
+      };
+
+      const h2ScatterEl = document.getElementById('h2-scatter');
+      const h2TimelineEl = document.getElementById('h2-timeline');
+      if (h2ScatterEl && h2TimelineEl) {
+        Promise.all([
+          embedChartView(h2ScatterEl, 'chart_h2_scatter'),
+          embedChartView(h2TimelineEl, 'chart_h2_timeline'),
+          embedChartView(document.getElementById('h2-readout'), 'chart_h2_readout'),
+        ]).then(([scatterResult, timelineResult, readoutResult]) => {
+          if (!scatterResult || !timelineResult) return;
+          const scatterView = scatterResult.view;
+          const timelineView = timelineResult.view;
+          const readoutView = readoutResult && readoutResult.view;
+
+          const select = document.getElementById('h2-event-select');
+          select.addEventListener('change', () => {
+            scatterView.signal('SelectedEvent', select.value).runAsync();
+            timelineView.signal('SelectedEvent', select.value).runAsync();
+          });
+
+          // Year-range filtering uses two plain YearMin/YearMax params kept
+          // in sync via view.signal() on the scatter + readout views (the
+          // timeline shows the full 2001-2025 span always, for context).
+          // An earlier version tried forwarding a free-drag brush's
+          // internal selection store between these independently-mounted
+          // views instead; that turned out not to work — writing into the
+          // store dataset via the Vega View API updates its contents, but
+          // doesn't invalidate the downstream filter, since Vega-Lite's
+          // compiled dataflow drives the filter from the selection's tuple
+          // signal, not the store directly. Plain params don't have that
+          // problem.
+          const yearMinSelect = document.getElementById('h2-year-min-select');
+          const yearMaxSelect = document.getElementById('h2-year-max-select');
+          const applyYearRange = () => {
+            const yMin = +yearMinSelect.value;
+            const yMax = +yearMaxSelect.value;
+            scatterView.signal('YearMin', yMin).signal('YearMax', yMax).runAsync();
+            if (readoutView) readoutView.signal('YearMin', yMin).signal('YearMax', yMax).runAsync();
+          };
+          yearMinSelect.addEventListener('change', applyYearRange);
+          yearMaxSelect.addEventListener('change', applyYearRange);
+        });
+      }
+
+      const h3StripEl = document.getElementById('h3-strip');
+      const h3QuadrantEl = document.getElementById('h3-quadrant');
+      if (h3StripEl && h3QuadrantEl) {
+        Promise.all([
+          embedChartView(h3StripEl, 'chart_crisis_timeline'),
+          embedChartView(h3QuadrantEl, 'chart_h3_quadrant'),
+        ]).then(([stripResult, quadrantResult]) => {
+          if (!stripResult || !quadrantResult) return;
+          const select = document.getElementById('h3-group-select');
+          select.addEventListener('change', () => {
+            stripResult.view.signal('ViewGroup', select.value).runAsync();
+            quadrantResult.view.signal('ViewGroup', select.value).runAsync();
+          });
+        });
+      }
     </script>
   </body>
 </html>

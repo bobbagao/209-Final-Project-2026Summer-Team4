@@ -1,0 +1,214 @@
+/* Ported from the standalone "Event Impact Map" D3 prototype. Every rule is
+   scoped under #event-impact-app so it can be embedded as one tab inside the
+   Explore section without leaking into the rest of the site — the source
+   file was written as its own full page, so its original :root/body/h1/svg
+   rules would otherwise silently recolor or refont content well outside
+   this widget. */
+
+#event-impact-app {
+  --bg: #0a0f14;
+  --panel: #111820;
+  --panel-2: #151d27;
+  --line: #232e3a;
+  --text: #e7ecf3;
+  --muted: #7c8a9e;
+  --up: #3ecf8e;
+  --up-dim: #1c4d3c;
+  --down: #f2545b;
+  --down-dim: #4d2126;
+  --amber: #f0b955;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sans: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 40px;
+  border-radius: 20px;
+}
+#event-impact-app * { box-sizing: border-box; }
+
+#event-impact-app .topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+#event-impact-app .brand-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 6px;
+}
+#event-impact-app h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  letter-spacing: -.01em;
+}
+#event-impact-app .sub {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 520px;
+  line-height: 1.5;
+  margin: 0;
+}
+#event-impact-app .controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+#event-impact-app .seg {
+  display: flex;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+#event-impact-app .seg button {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+#event-impact-app .seg button.active {
+  background: var(--amber);
+  color: #1a1305;
+}
+#event-impact-app .seg button:not(.active):hover {
+  color: var(--text);
+  background: var(--panel-2);
+}
+#event-impact-app .window-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+#event-impact-app .window-ctrl input[type=range] {
+  width: 150px;
+  accent-color: var(--amber);
+}
+#event-impact-app .window-ctrl b {
+  color: var(--text);
+  font-weight: 600;
+  min-width: 64px;
+  display: inline-block;
+  text-align: right;
+}
+#event-impact-app #chart-wrap {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+}
+#event-impact-app #chart-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 6px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+#event-impact-app #chart-meta .metric-label {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+}
+#event-impact-app #legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#event-impact-app .legend-item { display: flex; align-items: center; gap: 6px; }
+#event-impact-app .swatch { width: 11px; height: 11px; border-radius: 2px; }
+#event-impact-app svg { display: block; }
+#event-impact-app .cell rect {
+  stroke: var(--bg);
+  stroke-width: 1.5px;
+  cursor: pointer;
+  transition: opacity .12s ease;
+}
+#event-impact-app .cell:hover rect { opacity: .85; }
+#event-impact-app .cell text {
+  pointer-events: none;
+  fill: #0a0f14;
+}
+#event-impact-app .cell .name {
+  font-family: var(--sans);
+  font-weight: 700;
+}
+#event-impact-app .cell .val {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+#event-impact-app .cell .date {
+  font-family: var(--mono);
+  opacity: .75;
+}
+#event-impact-app #tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: #0d1319;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12px;
+  max-width: 260px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.5);
+  opacity: 0;
+  transition: opacity .1s ease;
+  z-index: 50;
+}
+#event-impact-app #tooltip .t-name {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--text);
+  line-height: 1.3;
+}
+#event-impact-app #tooltip .t-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--mono);
+  color: var(--muted);
+  margin-top: 3px;
+}
+#event-impact-app #tooltip .t-row b { color: var(--text); font-weight: 600; }
+#event-impact-app footer {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+#event-impact-app footer a { color: var(--muted); }
+#event-impact-app .empty-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  padding: 8px 6px 0;
+}
