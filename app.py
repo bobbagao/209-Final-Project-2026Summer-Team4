@@ -69,8 +69,6 @@ sections = [
         "title": "Do Gas Prices Really Predict the Stock Market?",
         "subtitle": "We tested three common assumptions about gas prices and the S&P 500 against 25 years of data. The results were a mixed bag — one didn't hold up, and two showed only a weak, inconclusive signal once we accounted for how little data there actually is.",
         "summary": "Scroll through three questions, each answered by a single chart built to be read at a glance — then explore the full data yourself at the end.",
-        "stats": ["25 years of data", "3 testable questions", "1 flatly rejected"],
-        "next": {"id": "introduction", "label": "Start the story"},
     },
     {
         "id": "introduction",
