@@ -248,6 +248,11 @@ sections = [
                 "caption": "The same earlier-version data as a scatter — each dot is one event.",
             },
             {
+                "title": "Event volatility (dumbbell)",
+                "chart_id": "chart_event_dumbbell",
+                "caption": "All 52 tracked events, one row each, connecting S&P 500 and gas-price volatility for the selected window.",
+            },
+            {
                 "title": "Normal vs. crisis (split)",
                 "chart_id": "chart_h3_split",
                 "caption": "How often gas prices and the S&P 500 move together, normal years versus crisis years.",
@@ -1150,6 +1155,114 @@ def make_chart_event_scatter(event_window: pd.DataFrame, correlations: pd.DataFr
     )
 
 
+def make_chart_event_dumbbell(event_window: pd.DataFrame) -> alt.LayerChart:
+    """Ported from a teammate's (Prathik's) prototype: one row per event,
+    connecting S&P 500 volatility and gas-price volatility for the selected
+    window so the gap between them is a visible line, not just two nearby
+    dots. His original version hand-typed 9 illustrative events; this one
+    reuses the same real 52-event dataset (with real dates/categories) that
+    the rest of the site's event-window charts already use, via
+    load_event_window_data(), instead of a second, inconsistent event list."""
+    wide = event_window.pivot(
+        index=["Event", "Category", "Start Date", "Window"], columns="Market", values="Volatility"
+    ).reset_index()
+    wide = wide.rename(columns={"S&P 500": "SP_Volatility", "Gas Price": "Gas_Volatility"})
+    wide = wide.dropna(subset=["SP_Volatility", "Gas_Volatility"])
+    wide["Display_Label"] = wide["Start Date"].dt.strftime("%Y-%m") + "  —  " + wide["Event"]
+
+    window_select = alt.selection_point(
+        fields=["Window"],
+        bind=alt.binding_select(options=EVENT_WINDOW_MONTHS, name="Months after event start: "),
+        value=6,
+    )
+    category_options = ["All categories"] + sorted(wide["Category"].unique().tolist())
+    category_filter = alt.param(
+        name="CategoryFilter",
+        value="All categories",
+        bind=alt.binding_select(options=category_options, name="Event category: "),
+    )
+    category_expr = "CategoryFilter == 'All categories' || datum.Category == CategoryFilter"
+
+    # Keyed on Event + Start Date, not Event alone: the events file has one
+    # genuine name collision ("U.S. Presidential Election (Trump Win)" for
+    # both 2016 and 2024) — matching by name only would make hovering/
+    # clicking one election's row also highlight the other.
+    hover = alt.selection_point(fields=["Event", "Start Date"], on="pointerover", clear="pointerout", empty=False)
+    selected = alt.selection_point(fields=["Event", "Start Date"], on="click", clear="dblclick", empty=True)
+
+    y_enc = alt.Y(
+        "Display_Label:N",
+        title=None,
+        sort=alt.SortField(field="Start Date", order="descending"),
+        axis=alt.Axis(labelLimit=360, labelPadding=10, ticks=False, domain=False),
+    )
+    tooltip = [
+        alt.Tooltip("Event:N", title="Event"),
+        alt.Tooltip("Start Date:T", title="Start date", format="%b %d, %Y"),
+        alt.Tooltip("Category:N", title="Category"),
+        alt.Tooltip("Window:O", title="Window (months)"),
+        alt.Tooltip("SP_Volatility:Q", title="S&P 500 volatility (%)", format=".1f"),
+        alt.Tooltip("Gas_Volatility:Q", title="Gas-price volatility (%)", format=".1f"),
+    ]
+
+    connectors = alt.Chart(wide).transform_filter(window_select).transform_filter(category_expr).mark_rule(
+        color=MUTED_COLOR, strokeWidth=2,
+    ).encode(
+        y=y_enc,
+        x=alt.X("SP_Volatility:Q", title="Volatility during selected window (%)", scale=alt.Scale(zero=True, nice=True)),
+        x2="Gas_Volatility:Q",
+        opacity=alt.condition(selected, alt.value(0.75), alt.value(0.18)),
+        tooltip=tooltip,
+    ).add_params(window_select, category_filter)
+
+    long = wide.melt(
+        id_vars=["Event", "Category", "Start Date", "Window", "Display_Label"],
+        value_vars=["SP_Volatility", "Gas_Volatility"],
+        var_name="Market", value_name="Volatility",
+    )
+    long["Market"] = long["Market"].replace({"SP_Volatility": "S&P 500", "Gas_Volatility": "CA gas prices"})
+
+    points = alt.Chart(long).transform_filter(window_select).transform_filter(category_expr).mark_point(
+        filled=True, stroke=TEXT_COLOR, strokeWidth=1.1,
+    ).encode(
+        y=y_enc,
+        x=alt.X("Volatility:Q", scale=alt.Scale(zero=True, nice=True)),
+        color=alt.Color(
+            "Market:N", title=None,
+            scale=alt.Scale(domain=["S&P 500", "CA gas prices"], range=[SP_COLOR, GAS_COLOR]),
+            legend=alt.Legend(orient="top", direction="horizontal", symbolSize=140),
+        ),
+        shape=alt.Shape(
+            "Market:N", title=None,
+            scale=alt.Scale(domain=["S&P 500", "CA gas prices"], range=["circle", "diamond"]),
+            legend=None,
+        ),
+        size=alt.condition(hover, alt.value(190), alt.value(110)),
+        opacity=alt.condition(selected, alt.value(1), alt.value(0.16)),
+        tooltip=[
+            alt.Tooltip("Event:N", title="Event"),
+            alt.Tooltip("Start Date:T", title="Start date", format="%b %d, %Y"),
+            alt.Tooltip("Category:N", title="Category"),
+            alt.Tooltip("Market:N", title="Measure"),
+            alt.Tooltip("Volatility:Q", title="Volatility (%)", format=".1f"),
+            alt.Tooltip("Window:O", title="Window (months)"),
+        ],
+    ).add_params(hover, selected)
+
+    return alt.layer(connectors, points).properties(
+        title=alt.TitleParams(
+            text="How Volatile Were Stocks and Gas Prices After Each Major Event?",
+            subtitle=[
+                "All 52 tracked events, ordered by date. Farther right means more volatility; shorter connectors mean more similar reactions.",
+                "Hover for exact values. Click an event to focus it; double-click to reset.",
+            ],
+        ),
+        width="container",
+        height=alt.Step(26),
+        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
+    )
+
+
 def make_chart1(long_index: pd.DataFrame) -> alt.Chart:
     base = alt.Chart(long_index)
     series_colors = alt.Scale(domain=["S&P 500", "Gas Prices"], range=[SP_COLOR, GAS_COLOR])
@@ -1484,6 +1597,7 @@ def build_chart_specs() -> dict:
         "chart4": make_chart4(data["annual"]),
         "chart_event_window": make_chart_event_window(event_window, correlations),
         "chart_event_scatter": make_chart_event_scatter(event_window, correlations),
+        "chart_event_dumbbell": make_chart_event_dumbbell(event_window),
         "chart_h2_combined": make_chart_h2_combined(annual_h2, h2_stats),
         "chart_h2_scatter": make_chart_h2_scatter_spec(annual_h2, h2_stats),
         "chart_h2_timeline": make_chart_h2_timeline_spec(annual_h2),
