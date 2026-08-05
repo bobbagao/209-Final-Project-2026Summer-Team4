@@ -146,7 +146,7 @@ sections = [
         ],
         "finding": {
             "label": "The Finding",
-            "text": "No. In 2 of 4 downturns, gas bottomed out first; in the other 2, the S&P 500 did. The gap ranges from 2 to 9 months, with no consistent pattern in which market leads. Worth flagging: this is a small sample (only 4 major downturns exist in 25 years), and the exact trough dates are read off month-end prices, which can miss the true day-to-day low by a few weeks — but even allowing for that uncertainty, there's no visible sign of a reliable pattern either way.",
+            "text": "No. Gas bottomed out first in 2 of the 4 downturns, and the S&P 500 did in the other 2 — sometimes gas led by months, sometimes stocks did. There's no reliable pattern either way.",
         },
         "metrics": [
             {"value": "No consistent leader", "label": "gas dipped first in 2 of 4 downturns, the S&P 500 in the other 2"},
@@ -164,18 +164,16 @@ sections = [
             "Here we measure it annually: S&P 500 volatility is the annualized standard deviation of monthly returns for that year, and gas volatility is the absolute year-over-year change in the average California gas price. "
             f"One point per year, 2001–2025. Use the year-range dropdowns to zoom the scatter to a window — its {term('trend-line slope')} updates live."
         ),
-        "chart_id": "chart_h2_combined",
-        "chart_title": "Annual volatility vs. gas-price swing",
         "chart_caption": "Each dot in the scatter is one year; the linked timeline below shows both measures on the same scale.",
         "finding": {
             "label": "The Finding",
-            "text": "Weak, and not statistically significant. Across the 25 years from 2001–2025, S&P 500 volatility and the size of that year's gas-price swing show only a weak positive relationship (r = 0.31). The 95% confidence interval, [-0.10, 0.63], crosses zero, and the correlation doesn't clear the standard bar for statistical significance (p = 0.136). There's a hint of the pattern the hypothesis predicts, but with only 25 annual observations, we can't rule out that it's just noise.",
+            "text": "Weak, and not reliable enough to trust. Bigger stock-market swings do tend to come with slightly bigger gas-price swings, but the pattern is faint — and with only 25 years of data, we can't rule out that it's just noise.",
         },
         "metrics": [
-            {"value": "r = 0.31", "label": "weak positive association"},
-            {"value": "p = 0.136", "label": "not statistically significant"},
-            {"value": "n = 25", "label": "annual observations, 2001-2025"},
+            {"value": "Weak signal", "label": "a hint of the pattern, not strong evidence"},
+            {"value": "Not reliable", "label": "25 years isn't enough to rule out noise"},
         ],
+        "technical_details": "Pearson r = 0.31 (95% CI: -0.10 to 0.63), p = 0.136. The correlation doesn't clear the standard bar for statistical significance, and the confidence interval crosses zero.",
         "next": {"id": "hypothesis-3", "label": "Question 3: Do crises break the link?"},
     },
     {
@@ -191,7 +189,7 @@ sections = [
         "chart_caption": "Every point in the scatter is labeled with its year. Quadrant color tells you \"same\" from \"opposite\" directly; circles are normal years, diamonds are crisis years.",
         "finding": {
             "label": "The Finding",
-            "text": "Inconclusive. Normal years moved in the same direction 63% of the time versus 43% in crisis years (2001-02, 2008-09, 2020, 2022-23) — a real gap in the raw numbers, and in the direction the hypothesis predicts. But with only 7 crisis years to work with, a Fisher's exact test can't rule out that this gap is just chance (p = 0.41). We can't confidently say the pattern breaks down during a crisis — only that it might, and we don't have enough data yet to tell.",
+            "text": "Inconclusive. Gas prices and the S&P 500 moved together 63% of the time in normal years, but only 43% of the time during a crisis — a real gap, in the direction we'd expect. But there are only 7 crisis years to check against, so we can't be confident it's a real effect and not just chance.",
         },
         "metrics": [],
         "technical_details": "",
@@ -212,11 +210,11 @@ sections = [
         "type": "story",
         "eyebrow": "05 • Conclusion",
         "title": "What the data actually shows",
-        "description": "Testing three specific, falsifiable questions instead of assuming a single story produced three answers that all point the same way: one hypothesis wasn't supported at all, and the other two showed only weak signals that don't clear statistical significance once the (small) amount of data is accounted for. That consistency is itself the finding — the gas-price/S&P relationship isn't the strong, reliable story it's often assumed to be, and claiming more certainty than the data actually supports would have been misleading.",
+        "description": "All three answers point the same way: gas prices don't reliably predict or track the stock market. One question came back a clear no; the other two showed only faint hints that don't hold up once you account for how little data there is. That consistency is itself the finding — the relationship isn't the strong, reliable story it's often assumed to be.",
         "highlights": [
-            "Hypothesis 1 (gas leads stocks down): not supported — across four major downturns, the lead varied both ways.",
-            "Hypothesis 2 (high volatility pairs with high volatility): weak and inconclusive — annual S&P volatility and the size of that year's gas-price swing show only a weak positive relationship (r = 0.31), and it isn't statistically significant (p = 0.136, n = 25).",
-            "Hypothesis 3 (crises break the link): inconclusive — normal years moved together more often than crisis years (63% vs. 43%), using a crisis-year definition kept consistent with Hypothesis 1, but with only 7 crisis years to work with, that gap isn't statistically significant (p = 0.41)."
+            "Does gas lead the market down? No — across four major downturns, the lead varied both ways.",
+            "Do bigger market swings mean bigger gas swings? Only weakly — there's a hint of a pattern, but not enough data to trust it.",
+            "Does a crisis break the link? Maybe — normal years moved together more often than crisis years, but there aren't enough crisis years to be confident it's real."
         ],
         "next": {"id": "chart-explorer", "label": "Explore the full data yourself"},
     },
@@ -228,39 +226,9 @@ sections = [
         "description": "Now that you've seen the story, dig into any of the underlying visualizations directly — including the supporting charts that didn't make the main narrative.",
         "chart_items": [
             {
-                "title": "Who dipped first",
-                "chart_id": "chart_h1_timeline",
-                "caption": "The month each market bottomed out during four major downturns.",
-            },
-            {
-                "title": "Annual volatility vs. gas swing",
-                "chart_id": "chart_h2_combined",
-                "caption": "Annualized S&P volatility vs. the size of that year's gas-price swing, one point per year — the chart behind Question 2.",
-            },
-            {
-                "title": "Event volatility (timeline, alternate)",
-                "chart_id": "chart_event_window",
-                "caption": "An earlier version of the volatility analysis: S&P 500 and gas price volatility after every major event since 2001, with an adjustable time window.",
-            },
-            {
-                "title": "Event volatility (scatter, alternate)",
-                "chart_id": "chart_event_scatter",
-                "caption": "The same earlier-version data as a scatter — each dot is one event.",
-            },
-            {
                 "title": "Event volatility (dumbbell)",
                 "chart_id": "chart_event_dumbbell",
                 "caption": "All 52 tracked events, one row each, connecting S&P 500 and gas-price volatility for the selected window.",
-            },
-            {
-                "title": "Normal vs. crisis (split)",
-                "chart_id": "chart_h3_split",
-                "caption": "How often gas prices and the S&P 500 move together, normal years versus crisis years.",
-            },
-            {
-                "title": "Normal vs. crisis (combined)",
-                "chart_id": "chart_h3_quadrant",
-                "caption": "The same comparison as one combined scatter with quadrant coloring — every point labeled with its year.",
             },
             {
                 "title": "Yearly bars",
@@ -452,22 +420,6 @@ def load_event_window_data() -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
-def compute_event_window_correlations(event_window: pd.DataFrame) -> pd.DataFrame:
-    """Correlation between S&P volatility and gas volatility (both the
-    standard-deviation-based measure, so directly comparable) at each
-    window length, for the plain-language annotation under the chart."""
-    records = []
-    for window in EVENT_WINDOW_MONTHS:
-        sub = event_window[event_window["Window"] == window]
-        pivoted = sub.pivot(index=["Event", "Start Date"], columns="Market", values="Volatility").dropna()
-        r = pivoted["S&P 500"].corr(pivoted["Gas Price"])
-        strength = "little to no" if abs(r) < 0.1 else ("a weak" if abs(r) < 0.3 else "a moderate")
-        direction = "move together" if r > 0 else "move oppositely"
-        label = f"At this window: S&P volatility and gas volatility show {strength} tendency to {direction} (r = {r:+.2f})"
-        records.append({"Window": window, "Correlation": r, "Label": label})
-    return pd.DataFrame(records)
-
-
 def load_h2_annual_data() -> pd.DataFrame:
     """One row per calendar year (2001-2025): S&P 500 volatility (annualized
     standard deviation of monthly % returns — the closest equivalent to
@@ -541,178 +493,10 @@ def compute_h2_correlation(annual_h2: pd.DataFrame) -> dict:
     }
 
 
-def make_chart_h2_scatter(annual_h2: pd.DataFrame, stats: dict, year_brush: alt.Parameter, event_selector: alt.Parameter) -> alt.LayerChart:
-    base = alt.Chart(annual_h2).transform_filter(year_brush)
-
-    trend = base.transform_regression("SP_Volatility", "Gas_Swing").mark_line(
-        color=TEXT_COLOR, strokeWidth=2.5, strokeDash=[7, 5], opacity=0.75,
-    ).encode(x="SP_Volatility:Q", y="Gas_Swing:Q")
-
-    points = base.mark_circle(size=150, strokeWidth=1.5).encode(
-        x=alt.X("SP_Volatility:Q", title="S&P 500 annualized volatility (%)", scale=alt.Scale(zero=True)),
-        y=alt.Y("Gas_Swing:Q", title="Magnitude of annual CA gas-price change (%)", scale=alt.Scale(zero=True)),
-        color=alt.Color(
-            "Event_Status:N",
-            title=None,
-            legend=alt.Legend(orient="bottom"),
-            scale=alt.Scale(domain=["Major-event year", "Other year"], range=[MAJOR_EVENT_COLOR, OTHER_YEAR_COLOR]),
-        ),
-        opacity=alt.condition(
-            "SelectedEvent == 'All years' || datum.Event == SelectedEvent",
-            alt.value(0.95),
-            alt.value(0.15),
-        ),
-        stroke=alt.condition(
-            "SelectedEvent != 'All years' && datum.Event == SelectedEvent",
-            alt.value("#ffffff"),
-            alt.value("transparent"),
-        ),
-        tooltip=[
-            alt.Tooltip("Event:N", title="Event"),
-            alt.Tooltip("Year:O", title="Year"),
-            alt.Tooltip("Category:N", title="Category"),
-            alt.Tooltip("SP_Volatility:Q", title="S&P volatility (%)", format=".1f"),
-            alt.Tooltip("Gas_Swing:Q", title="|Gas-price change| (%)", format=".1f"),
-            alt.Tooltip("Gas_Change:Q", title="Signed gas change (%)", format="+.1f"),
-            alt.Tooltip("SP_Return:Q", title="S&P annual return (%)", format="+.1f"),
-            alt.Tooltip("Gas_Price:Q", title="Gas price ($/gallon)", format=".2f"),
-        ],
-    ).add_params(year_brush, event_selector)
-
-    selected_label = base.transform_filter(
-        "SelectedEvent != 'All years' && datum.Event == SelectedEvent"
-    ).mark_text(
-        align="left", baseline="bottom", dx=8, dy=-8, fontSize=11, fontWeight="bold", color=TEXT_COLOR, limit=260,
-    ).encode(x="SP_Volatility:Q", y="Gas_Swing:Q", text="Event:N")
-
-    return (trend + points + selected_label).properties(
-        title=alt.TitleParams(
-            text="Do Volatile Stock-Market Years Coincide With Larger Gas-Price Swings?",
-            subtitle=[
-                "Each point is one year (2001-2025); the dashed line is the overall linear trend.",
-                f"Pearson r = {stats['r']:.2f}, 95% CI [{stats['ci_low']:.2f}, {stats['ci_high']:.2f}], "
-                f"p = {stats['p_value']:.3f}, n = {stats['n']}.",
-            ],
-        ),
-        width="container",
-        height=340,
-    )
-
-
-def make_chart_h2_scatter_readout(annual_h2: pd.DataFrame, year_brush: alt.Parameter) -> alt.LayerChart:
-    """Small info strip mounted above the scatter: the currently-selected
-    year range and the trend-line slope for that range, both recomputed live
-    as the timeline brush changes — makes the effect of dragging visible as
-    text, not just a shifting dashed line."""
-    base = alt.Chart(annual_h2).transform_filter(year_brush)
-
-    slope = base.transform_regression(
-        "SP_Volatility", "Gas_Swing", params=True
-    ).transform_calculate(
-        slope_text="'Trend-line slope: ' + format(datum.coef[1], '.2f')"
-    ).mark_text(align="left", fontSize=13, fontWeight="bold", color=TEXT_COLOR).encode(text="slope_text:N")
-
-    year_range = base.transform_aggregate(
-        min_year="min(Year)", max_year="max(Year)"
-    ).transform_calculate(
-        range_text="'Selected years: ' + datum.min_year + '–' + datum.max_year"
-    ).mark_text(align="left", dx=220, fontSize=13, color=MUTED_COLOR).encode(text="range_text:N")
-
-    return (slope + year_range).add_params(year_brush).properties(width="container", height=30)
-
-
-def make_chart_h2_timeline(annual_h2: pd.DataFrame, year_brush: alt.Parameter, metric_selection: alt.Parameter, event_selector: alt.Parameter) -> alt.LayerChart:
-    timeline_df = annual_h2.melt(
-        id_vars=["Year", "Year_Date", "Event", "Category"],
-        value_vars=["SP_Volatility", "Gas_Swing"],
-        var_name="Metric",
-        value_name="Percent",
-    )
-    timeline_df["Metric"] = timeline_df["Metric"].map({
-        "SP_Volatility": "S&P annualized volatility",
-        "Gas_Swing": "|CA gas price YoY change|",
-    })
-
-    metric_domain = ["S&P annualized volatility", "|CA gas price YoY change|"]
-    metric_color = alt.Color(
-        "Metric:N",
-        title=None,
-        legend=alt.Legend(orient="bottom"),
-        scale=alt.Scale(domain=metric_domain, range=[SP_COLOR, GAS_COLOR]),
-    )
-
-    lines = alt.Chart(timeline_df).mark_line(strokeWidth=2.5).encode(
-        x=alt.X("Year_Date:T", title="Year", axis=alt.Axis(format="%Y", tickCount=13)),
-        y=alt.Y("Percent:Q", title="Annual magnitude (%)", scale=alt.Scale(zero=True)),
-        color=metric_color,
-        detail="Metric:N",
-        opacity=alt.condition(metric_selection, alt.value(1), alt.value(0.15)),
-    ).add_params(year_brush, metric_selection, event_selector)
-
-    points = alt.Chart(timeline_df).mark_circle(size=70).encode(
-        x="Year_Date:T",
-        y="Percent:Q",
-        color=alt.Color("Metric:N", scale=alt.Scale(domain=metric_domain, range=[SP_COLOR, GAS_COLOR]), legend=None),
-        opacity=alt.condition(metric_selection, alt.value(0.95), alt.value(0.15)),
-        tooltip=[
-            alt.Tooltip("Event:N", title="Event"),
-            alt.Tooltip("Year:O", title="Year"),
-            alt.Tooltip("Metric:N", title="Metric"),
-            alt.Tooltip("Percent:Q", title="Value (%)", format=".1f"),
-        ],
-    )
-
-    selected_rule = alt.Chart(annual_h2).transform_filter(
-        "SelectedEvent != 'All years' && datum.Event == SelectedEvent"
-    ).mark_rule(color="#ffffff", strokeWidth=2, strokeDash=[5, 4]).encode(
-        x="Year_Date:T",
-        tooltip=[alt.Tooltip("Event:N", title="Selected event"), alt.Tooltip("Year:O", title="Year")],
-    )
-
-    return (lines + points + selected_rule).properties(
-        title=alt.TitleParams(
-            text="Annual Context and Time-Window Filter",
-            subtitle=[
-                "Both measures use the same percentage scale — no dual axes.",
-                "Click a metric in the legend to emphasize or de-emphasize it.",
-            ],
-        ),
-        width="container",
-        height=170,
-    )
-
-
-def make_chart_h2_combined(annual_h2: pd.DataFrame, stats: dict) -> alt.VConcatChart:
-    """Kept as the single-mount version used by the Explore section's
-    alternate view — the primary Hypothesis 2 narrative uses the split specs
-    below instead, so its dropdown can sit between the two panels."""
-    year_brush = alt.selection_interval(encodings=["x"], name="YearWindow")
-    metric_selection = alt.selection_point(fields=["Metric"], bind="legend", name="MetricSelection")
-    event_selector = alt.param(
-        name="SelectedEvent",
-        value="All years",
-        bind=alt.binding_select(
-            options=["All years"] + sorted(
-                annual_h2.loc[annual_h2["Event"].ne("No major event"), "Event"].unique().tolist()
-            ),
-            name="Highlight event: ",
-        ),
-    )
-
-    scatter_chart = make_chart_h2_scatter(annual_h2, stats, year_brush, event_selector)
-    timeline_chart = make_chart_h2_timeline(annual_h2, year_brush, metric_selection, event_selector)
-
-    return alt.vconcat(scatter_chart, timeline_chart, spacing=28).resolve_scale(
-        color="independent"
-    ).properties(
-        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
-    )
-
-
 def make_chart_h2_scatter_ranged(annual_h2: pd.DataFrame, stats: dict, year_min: alt.Parameter, year_max: alt.Parameter, event_selector: alt.Parameter) -> alt.LayerChart:
-    """Same scatter as make_chart_h2_scatter, but filtered by two plain
-    YearMin/YearMax params instead of a drag-to-select interval selection.
-    Split-mounted views can't share an interval selection's internal
+    """H2's scatter, filtered by two plain YearMin/YearMax params instead of
+    a drag-to-select interval selection. Split-mounted views can't share an
+    interval selection's internal
     "_store" dataset reliably (confirmed empirically — writing into it via
     the Vega View API updates the dataset's contents but doesn't invalidate
     the downstream filter, since Vega-Lite's compiled dataflow drives that
@@ -984,185 +768,14 @@ def make_chart_h1_timeline(points: pd.DataFrame, spans: pd.DataFrame) -> alt.Lay
     )
 
 
-def make_chart_event_window(event_window: pd.DataFrame, correlations: pd.DataFrame) -> alt.VConcatChart:
-    """Timeline view: gas volatility as bars (right axis) and S&P volatility
-    as lollipops (left axis, zero-anchored to match the bars' visual
-    language) sharing one time axis, so viewers can compare whether tall
-    bars and tall lollipops tend to line up at the same events. No smoothed
-    trend line — it added visual weight without helping the actual
-    side-by-side comparison, which is the point of this view."""
-    window_select = alt.selection_point(
-        fields=["Window"],
-        bind=alt.binding_select(options=EVENT_WINDOW_MONTHS, name="Months after event start: "),
-        value=6,
-    )
-
-    category_domain = sorted(event_window["Category"].unique())
-    color = alt.Color(
-        "Category:N",
-        title="Event Category",
-        legend=alt.Legend(orient="bottom", columns=2, labelLimit=160, symbolLimit=20),
-        scale=alt.Scale(domain=category_domain),
-    )
-    tooltip = [
-        "Event:N",
-        "Category:N",
-        alt.Tooltip("Start Date:T", format="%b %Y"),
-        "Window:O",
-        alt.Tooltip("Volatility:Q", format=".1f", title="Volatility (std. dev. of monthly returns, %)"),
-    ]
-
-    base_gas = alt.Chart(event_window).transform_filter(
-        alt.FieldEqualPredicate(field="Market", equal="Gas Price")
-    ).transform_filter(window_select)
-
-    base_sp = alt.Chart(event_window).transform_filter(
-        alt.FieldEqualPredicate(field="Market", equal="S&P 500")
-    ).transform_filter(window_select)
-
-    sp_axis_color = SP_COLOR
-    gas_axis_color = GAS_COLOR
-
-    gas_bars = base_gas.mark_bar(opacity=0.35, color=gas_axis_color, size=5).encode(
-        x=alt.X("Start Date:T", title="Event Start Date"),
-        y=alt.Y(
-            "Volatility:Q",
-            title="Gas Price Volatility (%)",
-            axis=alt.Axis(orient="right", titleColor=gas_axis_color, labelColor=gas_axis_color),
-        ),
-        tooltip=tooltip,
-    ).add_params(window_select)
-
-    sp_rule = base_sp.mark_rule(strokeWidth=2).encode(
-        x=alt.X("Start Date:T"),
-        y=alt.Y(
-            "Volatility:Q",
-            title="S&P 500 Volatility (%)",
-            axis=alt.Axis(titleColor=sp_axis_color, labelColor=sp_axis_color),
-        ),
-        y2=alt.Y2(datum=0),
-        color=color,
-        tooltip=tooltip,
-    )
-
-    sp_point = base_sp.mark_circle(size=80, stroke="white", strokeWidth=0.6).encode(
-        x=alt.X("Start Date:T"),
-        # No y-title here: shares S&P 500's axis/scale with sp_rule above
-        # (grouped in one sub-layer so Vega-Lite renders a single axis
-        # instead of one per layer, which was drawing the title twice).
-        y=alt.Y("Volatility:Q", axis=None),
-        color=color,
-        tooltip=tooltip,
-    )
-
-    sp_group = (sp_rule + sp_point)
-    combined = (gas_bars + sp_group).resolve_scale(y="independent").properties(
-        title=alt.TitleParams(
-            text="S&P 500 Volatility (orange, left axis) vs. Gas Price Volatility (blue, right axis)",
-            subtitle=[
-                "Volatility = standard deviation of monthly % returns during the selected window.",
-                "Left axis = S&P 500. Right axis = gas prices.",
-            ],
-        ),
-        width="container",
-        height=420,
-    )
-
-    annotation = alt.Chart(correlations).transform_filter(window_select).mark_text(
-        fontSize=13,
-        fontStyle="italic",
-        color=MUTED_COLOR,
-    ).encode(
-        text="Label:N",
-    ).properties(width="container", height=30)
-
-    return alt.vconcat(combined, annotation).properties(
-        title="S&P 500 Volatility vs. Gas Price Volatility After Major Events — Timeline View",
-        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
-    )
-
-
-def make_chart_event_scatter(event_window: pd.DataFrame, correlations: pd.DataFrame) -> alt.VConcatChart:
-    """Scatter view of the same volatility data: one dot per event, gas
-    volatility on the x-axis and S&P volatility on the y-axis, both on the
-    same shared plane (no dual axes to reconcile). An upward-sloping cluster
-    means the two tend to get volatile together; a fitted trend line makes
-    that slope explicit."""
-    window_select = alt.selection_point(
-        fields=["Window"],
-        bind=alt.binding_select(options=EVENT_WINDOW_MONTHS, name="Months after event start: "),
-        value=6,
-    )
-
-    wide = event_window.pivot(
-        index=["Event", "Category", "Start Date", "Window"], columns="Market", values="Volatility"
-    ).reset_index()
-    wide = wide.rename(columns={"S&P 500": "SP_Volatility", "Gas Price": "Gas_Volatility"})
-    wide = wide.dropna(subset=["SP_Volatility", "Gas_Volatility"])
-
-    category_domain = sorted(wide["Category"].unique())
-    color = alt.Color(
-        "Category:N",
-        title="Event Category",
-        legend=alt.Legend(orient="bottom", columns=2, labelLimit=160, symbolLimit=20),
-        scale=alt.Scale(domain=category_domain),
-    )
-    tooltip = [
-        "Event:N",
-        "Category:N",
-        alt.Tooltip("Start Date:T", format="%b %Y"),
-        "Window:O",
-        alt.Tooltip("Gas_Volatility:Q", format=".1f", title="Gas Price Volatility (%)"),
-        alt.Tooltip("SP_Volatility:Q", format=".1f", title="S&P 500 Volatility (%)"),
-    ]
-
-    base = alt.Chart(wide).transform_filter(window_select)
-
-    points = base.mark_circle(size=140, stroke="white", strokeWidth=0.6).encode(
-        x=alt.X("Gas_Volatility:Q", title="Gas Price Volatility (%)"),
-        y=alt.Y("SP_Volatility:Q", title="S&P 500 Volatility (%)"),
-        color=color,
-        tooltip=tooltip,
-    ).add_params(window_select)
-
-    trend = base.transform_regression("Gas_Volatility", "SP_Volatility").mark_line(
-        color=SP_COLOR, strokeWidth=3, strokeDash=[6, 3]
-    ).encode(
-        x="Gas_Volatility:Q",
-        y="SP_Volatility:Q",
-    )
-
-    combined = (points + trend).properties(
-        title=alt.TitleParams(
-            text="S&P 500 Volatility vs. Gas Price Volatility, by Event",
-            subtitle=["Each dot is one event. An upward-sloping cluster means the two tend to get volatile together."],
-        ),
-        width="container",
-        height=460,
-    )
-
-    annotation = alt.Chart(correlations).transform_filter(window_select).mark_text(
-        fontSize=13,
-        fontStyle="italic",
-        color=MUTED_COLOR,
-    ).encode(
-        text="Label:N",
-    ).properties(width="container", height=30)
-
-    return alt.vconcat(combined, annotation).properties(
-        title="S&P 500 Volatility vs. Gas Price Volatility After Major Events — Scatter View",
-        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
-    )
-
-
 def make_chart_event_dumbbell(event_window: pd.DataFrame) -> alt.LayerChart:
     """Ported from a teammate's (Prathik's) prototype: one row per event,
     connecting S&P 500 volatility and gas-price volatility for the selected
     window so the gap between them is a visible line, not just two nearby
     dots. His original version hand-typed 9 illustrative events; this one
     reuses the same real 52-event dataset (with real dates/categories) that
-    the rest of the site's event-window charts already use, via
-    load_event_window_data(), instead of a second, inconsistent event list."""
+    the rest of the site's charts use, via load_event_window_data(), instead
+    of a second, inconsistent event list."""
     wide = event_window.pivot(
         index=["Event", "Category", "Start Date", "Window"], columns="Market", values="Volatility"
     ).reset_index()
@@ -1352,62 +965,6 @@ def prepare_direction_data(annual: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def make_chart_h3_split(annual: pd.DataFrame) -> alt.HConcatChart:
-    direction_data = prepare_direction_data(annual)
-    direction_color = alt.Color(
-        "Direction:N",
-        title=None,
-        legend=alt.Legend(orient="bottom"),
-        scale=alt.Scale(domain=["Same Direction", "Opposite Direction"], range=[POSITIVE_COLOR, NEGATIVE_COLOR]),
-    )
-    tooltip = [
-        "Year:O",
-        "Event:N",
-        alt.Tooltip("Gas_Change:Q", format=".1f", title="Gas Price Change (%)"),
-        alt.Tooltip("SP_Return:Q", format=".1f", title="S&P 500 Return (%)"),
-    ]
-
-    def group_panel(group_name: str) -> alt.LayerChart:
-        sub = direction_data[direction_data["Group"] == group_name]
-        pct_together = (sub["Direction"] == "Same Direction").mean() * 100
-        year_list = ", ".join(str(y) for y in sorted(sub["Year"].tolist()))
-
-        base = alt.Chart(sub)
-        zero_x = alt.Chart(pd.DataFrame({"z": [0]})).mark_rule(color="#ccc", strokeDash=[4, 4]).encode(x="z:Q")
-        zero_y = alt.Chart(pd.DataFrame({"z": [0]})).mark_rule(color="#ccc", strokeDash=[4, 4]).encode(y="z:Q")
-        points = base.mark_circle(size=140, stroke="white", strokeWidth=0.5).encode(
-            x=alt.X("Gas_Change:Q", title="Gas Price Change (%)", scale=alt.Scale(domain=[-45, 45])),
-            y=alt.Y("SP_Return:Q", title="S&P 500 Return (%)", scale=alt.Scale(domain=[-45, 45])),
-            color=direction_color,
-            tooltip=tooltip,
-        )
-        labels = base.mark_text(dy=-14, fontSize=9.5, color=TEXT_COLOR).encode(
-            x=alt.X("Gas_Change:Q", scale=alt.Scale(domain=[-45, 45])),
-            y=alt.Y("SP_Return:Q", scale=alt.Scale(domain=[-45, 45])),
-            text=alt.Text("Year:O"),
-        )
-
-        return (zero_x + zero_y + points + labels).properties(
-            title=alt.TitleParams(
-                text=group_name,
-                subtitle=[
-                    f"{pct_together:.0f}% of years moved in the same direction",
-                    f"Years: {year_list}",
-                ],
-                subtitleFontSize=10.5,
-            ),
-            width="container",
-            height=440,
-        )
-
-    return alt.hconcat(
-        group_panel("Normal Years"),
-        group_panel("Crisis Years"),
-    ).properties(
-        title="Do Gas Prices and the S&P 500 Move Together? Normal Years vs. Crisis Years",
-    ).resolve_scale(color="shared")
-
-
 def compute_h3_significance(direction_data: pd.DataFrame) -> dict:
     """Fisher's exact test + Wilson 95% confidence intervals comparing how
     often normal vs. crisis years move in the same direction — tests
@@ -1570,7 +1127,6 @@ _h3_section["metrics"] = [
         "value": f"{H3_STATS['crisis_same']} of {H3_STATS['crisis_total']} crisis years — {H3_STATS['crisis_rate']:.0f}%",
         "label": "moved in the same direction",
     },
-    {"value": f"p = {H3_STATS['p_value']:.2f}", "label": "not statistically significant"},
 ]
 _h3_section["technical_details"] = (
     f"Fisher's exact test: p = {H3_STATS['p_value']:.3f}. 95% confidence intervals — "
@@ -1586,7 +1142,6 @@ def build_chart_specs() -> dict:
     alt.data_transformers.disable_max_rows()
     data = load_analysis_data()
     event_window = load_event_window_data()
-    correlations = compute_event_window_correlations(event_window)
     troughs = load_downturn_trough_data()
     annual_h2 = load_h2_annual_data()
     h2_stats = compute_h2_correlation(annual_h2)
@@ -1595,15 +1150,11 @@ def build_chart_specs() -> dict:
         "chart2": make_chart2(data["long_change"]),
         "chart3": make_chart3(data["long_change"]),
         "chart4": make_chart4(data["annual"]),
-        "chart_event_window": make_chart_event_window(event_window, correlations),
-        "chart_event_scatter": make_chart_event_scatter(event_window, correlations),
         "chart_event_dumbbell": make_chart_event_dumbbell(event_window),
-        "chart_h2_combined": make_chart_h2_combined(annual_h2, h2_stats),
         "chart_h2_scatter": make_chart_h2_scatter_spec(annual_h2, h2_stats),
         "chart_h2_timeline": make_chart_h2_timeline_spec(annual_h2),
         "chart_h2_readout": make_chart_h2_readout_spec(annual_h2),
         "chart_h1_timeline": make_chart_h1_timeline(troughs["points"], troughs["spans"]),
-        "chart_h3_split": make_chart_h3_split(data["annual"]),
         "chart_h3_quadrant": make_chart_h3_quadrant_spec(data["annual"]),
         "chart_crisis_timeline": make_chart_crisis_timeline(data["annual"], alt.param(name="ViewGroup", value="All Years")),
     }
