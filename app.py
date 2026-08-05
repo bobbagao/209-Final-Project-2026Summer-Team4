@@ -2,6 +2,7 @@ import os
 
 from flask import Flask, render_template
 from markupsafe import escape
+from typing import Optional
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -35,7 +36,7 @@ GLOSSARY = {
 }
 
 
-def term(label: str, key: str | None = None) -> str:
+def term(label: str, key: Optional[str] = None) -> str:
     """Wraps `label` in a hoverable span with a plain-language definition
     (see static/styles.css .term / .term::after) so jargon in the prose
     doesn't need a separate glossary section. Only used on the exact
@@ -194,7 +195,17 @@ sections = [
         },
         "metrics": [],
         "technical_details": "",
-        "next": {"id": "conclusion", "label": "See the full conclusion"},
+        "next": {"id": "event-impact", "label": "See the event impact map"},
+    },
+    {
+        "id": "event-impact",
+        "type": "event_map",
+        "eyebrow": "07 • Event Impact",
+        "title": "Which shocks moved the market most?",
+        "description": "Each tile is a major global event since 2001. Tile size = magnitude of change after the event; color shows whether the S&P 500 or California gas price gained or lost over the selected window.",
+        "chart_caption": "Adjust the window or switch the metric to see how impact compounds or fades over time.",
+        "metrics": [],
+        "next": {"id": "conclusion", "label": "See the conclusion"},
     },
     {
         "id": "conclusion",
@@ -251,12 +262,7 @@ sections = [
                 "chart_id": "chart3",
                 "caption": "Yearly percent change bars make the ups and downs easier to compare.",
             },
-            {
-                "title": "Event impact map",
-                "chart_id": "event_impact_map",
-                "caption": "Tile size = magnitude of % change following each major event since 2001; color = direction. Switch the metric or adjust the window to see how impact compounds or fades over time.",
-            },
-        ],
+        ]
     },
 ]
 
