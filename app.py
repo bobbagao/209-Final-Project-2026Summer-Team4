@@ -565,18 +565,18 @@ def make_chart_h2_timeline_ranged(annual_h2: pd.DataFrame, metric_selection: alt
         scale=alt.Scale(domain=metric_domain, range=[SP_COLOR, GAS_COLOR]),
     )
 
-    # Full-height transparent drag target for the year-range brush — wider
-    # hit area than dragging directly on the thin line marks. The brush's
-    # own domain-space interval (signal "YearBrush_d", confirmed via a
-    # throwaway vegaEmbed sandbox test) is read directly in JS and pushed
-    # into the scatter/readout views' existing YearMin/YearMax params —
-    # this avoids the documented "_store" cross-view forwarding bug (see
-    # w209-vega-lite-gotchas) by never touching the selection's store at
-    # all, only its plain derived signal.
+    # The year-range brush is attached directly to the "lines" mark below
+    # (x+y both encoded), matching the exact pattern this project's own
+    # earlier `make_chart_h2_timeline` used before it was replaced with
+    # dropdowns — confirmed against git history after a first attempt at
+    # this (a dedicated x-only invisible mark_rect layer as the drag
+    # target) rendered a degenerate zero-size hit area on every check.
+    # Its domain-space interval (signal "YearBrush_d") is read directly in
+    # JS and pushed into the scatter/readout views' existing YearMin/
+    # YearMax params — this avoids the documented "_store" cross-view
+    # forwarding bug (see w209-vega-lite-gotchas) by never touching the
+    # selection's store at all, only its plain derived signal.
     year_brush = alt.selection_interval(encodings=["x"], name="YearBrush")
-    brush_target = alt.Chart(timeline_df).mark_rect(opacity=0).encode(
-        x=alt.X("Year_Date:T"),
-    ).add_params(year_brush)
 
     lines = alt.Chart(timeline_df).mark_line(strokeWidth=2.5).encode(
         x=alt.X("Year_Date:T", title="Year", axis=alt.Axis(format="%Y", tickCount=13)),
@@ -584,7 +584,7 @@ def make_chart_h2_timeline_ranged(annual_h2: pd.DataFrame, metric_selection: alt
         color=metric_color,
         detail="Metric:N",
         opacity=alt.condition(metric_selection, alt.value(1), alt.value(0.15)),
-    ).add_params(metric_selection, event_selector)
+    ).add_params(year_brush, metric_selection, event_selector)
 
     points = alt.Chart(timeline_df).mark_circle(size=70).encode(
         x="Year_Date:T",
@@ -606,7 +606,7 @@ def make_chart_h2_timeline_ranged(annual_h2: pd.DataFrame, metric_selection: alt
         tooltip=[alt.Tooltip("Event:N", title="Selected event"), alt.Tooltip("Year:O", title="Year")],
     )
 
-    return (brush_target + lines + points + selected_rule).properties(
+    return (lines + points + selected_rule).properties(
         title=alt.TitleParams(
             text="Annual Context",
             subtitle=[

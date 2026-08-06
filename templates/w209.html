@@ -531,13 +531,18 @@
 
           // Drag-to-select on the timeline, restored: rather than forward
           // the brush's own store (the broken approach above), read its
-          // already-computed domain-space signal ("YearBrush_d" — a plain
-          // derived signal, confirmed via a throwaway vegaEmbed sandbox
-          // test, holding real Date objects, not pixel coordinates) and
-          // feed it through the exact same applyYearRange() path the
-          // dropdowns use. Snaps to whole years and keeps the dropdowns
-          // showing the dragged range so both controls stay in sync.
-          timelineView.addSignalListener('YearBrush_d', (_name, value) => {
+          // already-computed domain-space signal — a plain derived signal
+          // holding real Date objects, not pixel coordinates. Its name is
+          // "<selectionName>_<fieldName>" (confirmed via the compiled
+          // vgSpec, not guessed): since the brush is bound to the
+          // Year_Date field, that's "YearBrush_Year_Date", NOT the generic
+          // "YearBrush_d" a smaller isolated test spec (whose temporal
+          // field happened to be named "d") had suggested — addSignalListener
+          // throws "Unrecognized signal name" for a name that doesn't
+          // exist, which is exactly how this got caught. Feeds the result
+          // through the exact same applyYearRange() path the dropdowns
+          // use, snapped to whole years, keeping both controls in sync.
+          timelineView.addSignalListener('YearBrush_Year_Date', (_name, value) => {
             if (!value || value.length !== 2) return;
             const yMin = Math.max(+yearMinSelect.options[0].value, new Date(value[0]).getFullYear());
             const yMax = Math.min(+yearMaxSelect.options[yearMaxSelect.options.length - 1].value, new Date(value[1]).getFullYear());
