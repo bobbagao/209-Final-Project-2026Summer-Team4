@@ -37,17 +37,9 @@
         <span class="side-dot"></span>
         <span class="side-label">Question 3</span>
       </a>
-      <a href="#event-impact" class="side-link">
-        <span class="side-dot"></span>
-        <span class="side-label">Event Impact</span>
-      </a>
       <a href="#conclusion" class="side-link">
         <span class="side-dot"></span>
         <span class="side-label">Conclusion</span>
-      </a>
-      <a href="#chart-explorer" class="side-link">
-        <span class="side-dot"></span>
-        <span class="side-label">Explore</span>
       </a>
     </aside>
     <div class="side-progress" aria-hidden="true"><span class="side-progress-fill"></span></div>
@@ -89,52 +81,88 @@
         </div>
 
         {% if section.id == 'hypothesis-2' %}
-        <div class="linked-panel">
-          <div class="hero-chart-panel">
-            <div class="hero-chart-caption vega-chart-manual" id="h2-readout" data-chart="chart_h2_readout"></div>
-            <div class="hero-chart-visual vega-chart-manual" id="h2-scatter" data-chart="chart_h2_scatter" data-aria-label="{{ section.finding.text }}"></div>
+        <div class="chart-tab-group">
+          <div class="explorer-picker" role="tablist" aria-label="Chart view selector">
+            <button type="button" class="explorer-btn active" data-tab-target="h2-panel-main">
+              <span>Scatter &amp; timeline</span>
+            </button>
+            <button type="button" class="explorer-btn" data-tab-target="h2-panel-yearly">
+              <span>Yearly bars</span>
+            </button>
           </div>
-          <div class="dropdown-row">
-            <label for="h2-event-select">Highlight event:</label>
-            <select id="h2-event-select">
-              <option value="All years">All years</option>
-              {% for ev in h2_event_options %}
-              <option value="{{ ev }}">{{ ev }}</option>
-              {% endfor %}
-            </select>
-            <label for="h2-year-min-select">From year:</label>
-            <select id="h2-year-min-select">
-              {% for yr in h2_years %}
-              <option value="{{ yr }}"{% if loop.first %} selected{% endif %}>{{ yr }}</option>
-              {% endfor %}
-            </select>
-            <label for="h2-year-max-select">To year:</label>
-            <select id="h2-year-max-select">
-              {% for yr in h2_years %}
-              <option value="{{ yr }}"{% if loop.last %} selected{% endif %}>{{ yr }}</option>
-              {% endfor %}
-            </select>
+          <div class="tab-panel" id="h2-panel-main">
+            <div class="linked-panel">
+              <div class="hero-chart-panel">
+                <div class="hero-chart-caption vega-chart-manual" id="h2-readout" data-chart="chart_h2_readout"></div>
+                <div class="hero-chart-visual vega-chart-manual" id="h2-scatter" data-chart="chart_h2_scatter" data-aria-label="{{ section.finding.text }}"></div>
+              </div>
+              <div class="dropdown-row">
+                <label for="h2-event-select">Highlight event:</label>
+                <select id="h2-event-select">
+                  <option value="All years">All years</option>
+                  {% for ev in h2_event_options %}
+                  <option value="{{ ev }}">{{ ev }}</option>
+                  {% endfor %}
+                </select>
+                <label for="h2-year-min-select">From year:</label>
+                <select id="h2-year-min-select">
+                  {% for yr in h2_years %}
+                  <option value="{{ yr }}"{% if loop.first %} selected{% endif %}>{{ yr }}</option>
+                  {% endfor %}
+                </select>
+                <label for="h2-year-max-select">To year:</label>
+                <select id="h2-year-max-select">
+                  {% for yr in h2_years %}
+                  <option value="{{ yr }}"{% if loop.last %} selected{% endif %}>{{ yr }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="hero-chart-panel">
+                <div class="hero-chart-visual vega-chart-manual" id="h2-timeline" data-chart="chart_h2_timeline"></div>
+              </div>
+            </div>
+            <p class="hero-chart-caption">{{ section.chart_caption }}</p>
           </div>
-          <div class="hero-chart-panel">
-            <div class="hero-chart-visual vega-chart-manual" id="h2-timeline" data-chart="chart_h2_timeline"></div>
+          <div class="tab-panel" id="h2-panel-yearly" hidden>
+            <div class="hero-chart-panel">
+              <div class="hero-chart-visual vega-chart-lazy" data-chart="{{ section.yearly_chart_id }}" data-aria-label="{{ section.yearly_caption }}"></div>
+            </div>
+            <p class="hero-chart-caption">{{ section.yearly_caption }}</p>
           </div>
         </div>
-        <p class="hero-chart-caption">{{ section.chart_caption }}</p>
 
         {% elif section.id == 'hypothesis-3' %}
-        <div class="linked-panel">
-          <div class="hero-chart-visual hero-chart-visual-secondary vega-chart-manual" id="h3-strip" data-chart="chart_crisis_timeline" data-aria-label="A color-coded strip showing which years are classified as normal versus which kind of crisis."></div>
-          <div class="dropdown-row">
-            <label for="h3-group-select">Show years:</label>
-            <select id="h3-group-select">
-              <option value="All Years">All Years</option>
-              <option value="Normal Years">Normal Years</option>
-              <option value="Crisis Years">Crisis Years</option>
-            </select>
+        <div class="chart-tab-group">
+          <div class="explorer-picker" role="tablist" aria-label="Chart view selector">
+            <button type="button" class="explorer-btn active" data-tab-target="h3-panel-main">
+              <span>Crisis pattern</span>
+            </button>
+            <button type="button" class="explorer-btn" data-tab-target="h3-panel-dumbbell">
+              <span>Event volatility</span>
+            </button>
           </div>
-          <div class="hero-chart-visual vega-chart-manual" id="h3-quadrant" data-chart="chart_h3_quadrant" data-aria-label="{{ section.finding.text }}"></div>
+          <div class="tab-panel" id="h3-panel-main">
+            <div class="linked-panel">
+              <div class="hero-chart-visual hero-chart-visual-secondary vega-chart-manual" id="h3-strip" data-chart="chart_crisis_timeline" data-aria-label="A color-coded strip showing which years are classified as normal versus which kind of crisis."></div>
+              <div class="dropdown-row">
+                <label for="h3-group-select">Show years:</label>
+                <select id="h3-group-select">
+                  <option value="All Years">All Years</option>
+                  <option value="Normal Years">Normal Years</option>
+                  <option value="Crisis Years">Crisis Years</option>
+                </select>
+              </div>
+              <div class="hero-chart-visual vega-chart-manual" id="h3-quadrant" data-chart="chart_h3_quadrant" data-aria-label="{{ section.finding.text }}"></div>
+            </div>
+            <p class="hero-chart-caption">{{ section.chart_caption }}</p>
+          </div>
+          <div class="tab-panel" id="h3-panel-dumbbell" hidden>
+            <div class="hero-chart-panel">
+              <div class="hero-chart-visual vega-chart-lazy" data-chart="{{ section.dumbbell_chart_id }}" data-aria-label="{{ section.dumbbell_caption }}"></div>
+            </div>
+            <p class="hero-chart-caption">{{ section.dumbbell_caption }}</p>
+          </div>
         </div>
-        <p class="hero-chart-caption">{{ section.chart_caption }}</p>
 
         {% elif section.chart_items %}
         <div class="explorer-shell hero-chart-panel">
@@ -186,60 +214,10 @@
         </div>
         {% endif %}
 
-        {% if section.next %}
-        <a class="next-link" href="#{{ section.next.id }}">{{ section.next.label }} <span aria-hidden="true">→</span></a>
-        {% endif %}
-
-        {% else %}
-        <div class="section-meta">
-          <p class="eyebrow">{{ section.eyebrow }}</p>
-          <h2>{{ section.title }}</h2>
-          <p class="section-copy">{{ section.description }}</p>
+        {% if section.id == 'hypothesis-3' %}
+        <div class="section-meta" style="margin-top: 20px;">
+          <p class="section-copy">{{ section.event_impact_transition }}</p>
         </div>
-
-        {% if section.type == 'explorer' %}
-        <div class="explorer-shell">
-          <div class="explorer-window">
-            <div class="explorer-picker" role="tablist" aria-label="Chart selector">
-              {% for item in section.chart_items %}
-              <button
-                type="button"
-                class="explorer-btn{% if loop.first %} active{% endif %}"
-                data-title="{{ item.title }}"
-                data-caption="{{ item.caption }}"
-                data-chart="{{ item.chart_id }}"
-              >
-                <span>{{ item.title }}</span>
-              </button>
-              {% endfor %}
-            </div>
-            <div class="explorer-visual">
-              <div class="explorer-main-image vega-chart" data-chart="{{ section.chart_items[0].chart_id }}" data-aria-label="{{ section.chart_items[0].caption }}"></div>
-              <div class="explorer-meta">
-                <h3 class="explorer-card-title">{{ section.chart_items[0].title }}</h3>
-                <p class="explorer-card-caption">{{ section.chart_items[0].caption }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% if section.highlights %}
-        <ul class="highlight-list">
-          {% for point in section.highlights %}
-          <li>{{ point }}</li>
-          {% endfor %}
-        </ul>
-        {% endif %}
-        {% if section.metrics %}
-        <div class="metric-grid">
-          {% for metric in section.metrics %}
-          <article class="metric-card">
-            <strong>{{ metric.value }}</strong>
-            <span>{{ metric.label }}</span>
-          </article>
-          {% endfor %}
-        </div>
-        {% endif %}
-        {% elif section.type == 'event_map' %}
         <div class="explorer-shell">
           <div class="explorer-window">
             <div id="event-impact-app" class="event-impact-panel">
@@ -247,7 +225,7 @@
                 <div>
                   <p class="brand-eyebrow">Event Impact Map</p>
                   <h1>Which shocks moved the market most?</h1>
-                  <p class="sub">Each tile is a major global event since 2001. Tile size = magnitude of change after the event; color shows whether the S&P 500 or California gas price gained or lost over the selected window.</p>
+                  <p class="sub">Tile size = magnitude of change after the event; color shows whether the S&amp;P 500 or California gas price gained or lost over the selected window.</p>
                 </div>
                 <div class="controls">
                   <div class="seg" id="metric-seg">
@@ -285,17 +263,20 @@
             </div>
           </div>
         </div>
-        {% if section.metrics %}
-        <div class="metric-grid">
-          {% for metric in section.metrics %}
-          <article class="metric-card">
-            <strong>{{ metric.value }}</strong>
-            <span>{{ metric.label }}</span>
-          </article>
-          {% endfor %}
-        </div>
+        <p class="hero-chart-caption">{{ section.event_impact_caption }}</p>
         {% endif %}
+
+        {% if section.next %}
+        <a class="next-link" href="#{{ section.next.id }}">{{ section.next.label }} <span aria-hidden="true">→</span></a>
+        {% endif %}
+
         {% else %}
+        <div class="section-meta">
+          <p class="eyebrow">{{ section.eyebrow }}</p>
+          <h2>{{ section.title }}</h2>
+          <p class="section-copy">{{ section.description }}</p>
+        </div>
+
         {% if section.highlights %}
         <ul class="highlight-list">
           {% for point in section.highlights %}
@@ -324,7 +305,6 @@
           </article>
           {% endfor %}
         </div>
-        {% endif %}
         {% endif %}
 
         {% if section.next %}
@@ -462,6 +442,33 @@
             embedChart(visual, button.dataset.chart);
             if (title) title.textContent = button.dataset.title;
             if (caption) caption.textContent = button.dataset.caption;
+          });
+        });
+      });
+
+      // H2 and H3 each have a small tab strip sitting alongside their main
+      // linked-panel (which mounts eagerly, above). The second tab's chart
+      // is mounted lazily, on first click, not on page load — Vega-Lite's
+      // width:"container" autosize measures the container at mount time,
+      // and a `hidden` panel measures 0px wide, which would render the
+      // chart at zero width (same class of bug already worked around for
+      // the Event Impact Map's lazy init).
+      document.querySelectorAll('.chart-tab-group').forEach((group) => {
+        const buttons = Array.from(group.querySelectorAll('[data-tab-target]'));
+        const panels = Array.from(group.querySelectorAll('.tab-panel'));
+        buttons.forEach((button) => {
+          button.addEventListener('click', () => {
+            buttons.forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+            panels.forEach((panel) => {
+              const show = panel.id === button.dataset.tabTarget;
+              panel.hidden = !show;
+              if (!show) return;
+              panel.querySelectorAll('.vega-chart-lazy:not([data-mounted])').forEach((el) => {
+                el.dataset.mounted = 'true';
+                embedChart(el, el.dataset.chart);
+              });
+            });
           });
         });
       });

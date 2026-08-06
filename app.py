@@ -102,20 +102,20 @@ sections = [
         "id": "cover",
         "type": "hero",
         "eyebrow": "W209 • Data Visualization",
-        "title": "Do Gas Prices Really Predict the Stock Market?",
-        "subtitle": "We tested three common assumptions about gas prices and the S&P 500 against 25 years of data. The results were a mixed bag — one didn't hold up, and two showed only a weak, inconclusive signal once we accounted for how little data there actually is.",
-        "summary": "Scroll through three questions, each answered by a single chart built to be read at a glance — then explore the full data yourself at the end.",
+        "title": "Uh-oh Gas Prices. Uh-oh, Stock Market?",
+        "subtitle": "“Gas prices are up — is everything else about to go up too?” You've heard some version of this. It's a reasonable instinct: gas is the one economic number most of us actually notice. We checked it against 25 years of real data — and the answer is messier than the dinner-table version.",
+        "summary": "Let's find out if gas prices can tell us anything about the economy.",
     },
     {
         "id": "introduction",
         "type": "story",
         "eyebrow": "01 • Introduction",
         "title": "Why this relationship matters",
-        "description": "Gas prices and the stock market are often assumed to move together, but that assumption is rarely tested carefully. This report investigates the relationship through three specific, falsifiable questions — each paired with a visualization designed to let you see the pattern for yourself, rather than take our word for it.",
+        "description": "That gut feeling — gas prices as a stand-in for how the whole economy is doing — is worth actually checking instead of just repeating. So we asked it three ways, in order, each one a fallback for when the last one didn't give us a clean answer.",
         "highlights": [
-            "Gas prices react quickly to supply and policy changes.",
-            "The S&P 500 reflects expectations about growth and inflation.",
-            "We test three specific questions instead of assuming they move together."
+            "First, the most direct version: does a gas-price move happen before a stock-market move?",
+            "If not timing, maybe intensity: do bigger stock-market swings come with bigger gas-price swings?",
+            "If not that either, the simplest version: do they normally move together — and what happened when they didn't?"
         ],
         "next": {"id": "hypothesis-1", "label": "Question 1: Does gas lead the market down?"},
     },
@@ -124,26 +124,9 @@ sections = [
         "type": "hypothesis",
         "eyebrow": "02 • Question 1",
         "title": "Does a gas-price dip really happen before a stock-market dip?",
-        "description": "The original idea: falling gas prices act as an early warning sign for a stock market downturn. Annual averages can't show monthly timing, so instead we found the exact month each major downturn bottomed out in both markets and compared the dates directly.",
-        "chart_items": [
-            {
-                "title": "Indexed trend",
-                "chart_id": "chart1",
-                "caption": "A long-view comparison of the indexed S&P 500 and gas prices over time.",
-            },
-            {
-                "title": "Yearly change",
-                "chart_id": "chart2",
-                "caption": "Year-by-year percent change for both markets.",
-            },
-            {        
-                "title": "Does a gas-price dip really happen before a stock-market dip?",
-                "chart_id": "chart_h1_timeline",
-                "chart_caption": "The month each market bottomed out during four major downturns — no consistent leader emerges.",
-
-            },
-
-        ],
+        "description": "The everyday version of this: gas prices climbing before a downturn, like a warning light. We tested that literally, during the four biggest downturns since 2001 — the moments a warning sign would matter most. Annual averages can't show monthly timing, so instead we found the exact month each market actually bottomed out, and compared the dates directly.",
+        "chart_id": "chart1",
+        "chart_caption": "The S&P 500 and gas prices indexed to the same starting point, with callouts marking which market bottomed out first in each of the four downturns.",
         "finding": {
             "label": "The Finding",
             "text": "No. Gas bottomed out first in 2 of the 4 downturns, and the S&P 500 did in the other 2 — sometimes gas led by months, sometimes stocks did. There's no reliable pattern either way.",
@@ -160,11 +143,13 @@ sections = [
         "eyebrow": "03 • Question 2",
         "title": "Do bigger stock market swings come with bigger gas-price swings?",
         "description": (
-            f"{term('Volatility', 'volatility')} means how much a price bounces around, not just where it ends up — a market that swings wildly but nets out flat is still volatile. "
+            f"Timing didn't give us a clear signal — so what about intensity? {term('Volatility', 'volatility')} means how much a price bounces around, not just where it ends up — a market that swings wildly but nets out flat is still volatile. "
             "Here we measure it annually: S&P 500 volatility is the annualized standard deviation of monthly returns for that year, and gas volatility is the absolute year-over-year change in the average California gas price. "
             f"One point per year, 2001–2025. Use the year-range dropdowns to zoom the scatter to a window — its {term('trend-line slope')} updates live."
         ),
         "chart_caption": "Each dot in the scatter is one year; the linked timeline below shows both measures on the same scale.",
+        "yearly_chart_id": "chart3",
+        "yearly_caption": "Both series plotted on the same axis and overlaid, so a big year for one market against the other is easy to spot.",
         "finding": {
             "label": "The Finding",
             "text": "Weak, and not reliable enough to trust. Bigger stock-market swings do tend to come with slightly bigger gas-price swings, but the pattern is faint — and with only 25 years of data, we can't rule out that it's just noise.",
@@ -182,28 +167,22 @@ sections = [
         "eyebrow": "04 • Question 3",
         "title": "Does the normal link between gas prices and stocks hold up during a crisis?",
         "description": (
-            "In an average year, do gas prices and the S&P 500 move in the same direction? And does that really break down during a crisis? "
-            f"To keep {term('crisis year')} consistent with Hypothesis 1 instead of picking a separate list, a year counts as one here only if it falls between when gas and the S&P actually bottomed out during one of the same four downturns from Question 1 (the Dot-Com Crash, the 2008 Financial Crisis, COVID-19, and the 2022 selloff). "
-            "That gives 7 crisis years and 19 normal years, which we compared."
+            "Timing and intensity both came back murky — so here's the simplest version: in an average year, do gas prices and the S&P 500 at least move in the same direction, like parallel lanes? And does that break down during a crisis? "
+            f"To keep {term('crisis year')} consistent with Question 1 instead of picking a separate list, a year counts as one here only if it falls between when gas and the S&P actually bottomed out during one of the same four downturns from Question 1 (the Dot-Com Crash, the 2008 Financial Crisis, COVID-19, and the 2022 selloff). "
+            "That gives 7 crisis years and 18 normal years, which we compared (2000 is excluded — there's no prior year to measure its year-over-year change against)."
         ),
         "chart_caption": "Every point in the scatter is labeled with its year. Quadrant color tells you \"same\" from \"opposite\" directly; circles are normal years, diamonds are crisis years.",
+        "dumbbell_chart_id": "chart_event_dumbbell",
+        "dumbbell_caption": "All 52 tracked events, one row each, connecting S&P 500 and gas-price volatility for the selected window.",
         "finding": {
             "label": "The Finding",
-            "text": "Inconclusive. Gas prices and the S&P 500 moved together 63% of the time in normal years, but only 43% of the time during a crisis — a real gap, in the direction we'd expect. But there are only 7 crisis years to check against, so we can't be confident it's a real effect and not just chance.",
+            "text": "Inconclusive. Gas prices and the S&P 500 moved together 61% of the time in normal years, but only 43% of the time during a crisis — a modest gap, in the direction we'd expect. But there are only 7 crisis years to check against, so we can't be confident it's a real effect and not just chance.",
         },
         "metrics": [],
         "technical_details": "",
-        "next": {"id": "event-impact", "label": "See the event impact map"},
-    },
-    {
-        "id": "event-impact",
-        "type": "event_map",
-        "eyebrow": "07 • Event Impact",
-        "title": "Which shocks moved the market most?",
-        "description": "Each tile is a major global event since 2001. Tile size = magnitude of change after the event; color shows whether the S&P 500 or California gas price gained or lost over the selected window.",
-        "chart_caption": "Adjust the window or switch the metric to see how impact compounds or fades over time.",
-        "metrics": [],
-        "next": {"id": "conclusion", "label": "See the conclusion"},
+        "event_impact_transition": "So what actually breaks that pattern? A percentage only tells you so much — here's exactly which events moved each market, and by how much. Each tile below is a major event since 2001; tile size shows how big the move was, color shows which direction.",
+        "event_impact_caption": "Switch the metric or adjust the window to see how the impact compounds or fades over time.",
+        "next": {"id": "conclusion", "label": "See the full conclusion"},
     },
     {
         "id": "conclusion",
@@ -216,26 +195,6 @@ sections = [
             "Do bigger market swings mean bigger gas swings? Only weakly — there's a hint of a pattern, but not enough data to trust it.",
             "Does a crisis break the link? Maybe — normal years moved together more often than crisis years, but there aren't enough crisis years to be confident it's real."
         ],
-        "next": {"id": "chart-explorer", "label": "Explore the full data yourself"},
-    },
-    {
-        "id": "chart-explorer",
-        "type": "explorer",
-        "eyebrow": "06 • Explore",
-        "title": "Explore the data yourself",
-        "description": "Now that you've seen the story, dig into any of the underlying visualizations directly — including the supporting charts that didn't make the main narrative.",
-        "chart_items": [
-            {
-                "title": "Event volatility (dumbbell)",
-                "chart_id": "chart_event_dumbbell",
-                "caption": "All 52 tracked events, one row each, connecting S&P 500 and gas-price volatility for the selected window.",
-            },
-            {
-                "title": "Yearly bars",
-                "chart_id": "chart3",
-                "caption": "Yearly percent change bars make the ups and downs easier to compare.",
-            },
-        ]
     },
 ]
 
@@ -732,42 +691,6 @@ def compute_crisis_years() -> dict:
 CRISIS_YEAR_MAP = compute_crisis_years()
 
 
-def make_chart_h1_timeline(points: pd.DataFrame, spans: pd.DataFrame) -> alt.LayerChart:
-    episode_order = list(DOWNTURN_EPISODES.keys())
-    market_color = alt.Color(
-        "Market:N",
-        title="Market",
-        legend=alt.Legend(orient="bottom"),
-        scale=alt.Scale(domain=["S&P 500", "Gas Price"], range=[SP_COLOR, GAS_COLOR]),
-    )
-
-    connector = alt.Chart(spans).mark_rule(strokeWidth=3, color="#b0b0b0").encode(
-        y=alt.Y("Episode:N", sort=episode_order, title=None),
-        x=alt.X("start_date:T", title="Month the Market Bottomed Out"),
-        x2="end_date:T",
-    )
-
-    dots = alt.Chart(points).mark_circle(size=260, stroke="white", strokeWidth=1).encode(
-        y=alt.Y("Episode:N", sort=episode_order, title=None),
-        x=alt.X("Trough Date:T"),
-        color=market_color,
-        tooltip=["Episode:N", "Market:N", alt.Tooltip("Trough Date:T", format="%B %Y")],
-    )
-
-    labels = alt.Chart(spans).mark_text(dy=-22, fontSize=12, fontWeight="bold", color=TEXT_COLOR).encode(
-        y=alt.Y("Episode:N", sort=episode_order),
-        x=alt.X("mid_date:T"),
-        text="Label:N",
-    )
-
-    return (connector + dots + labels).properties(
-        title="Who Dipped First? Gas Price vs. S&P 500 Bottom, by Downturn",
-        width="container",
-        height=240,
-        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
-    )
-
-
 def make_chart_event_dumbbell(event_window: pd.DataFrame) -> alt.LayerChart:
     """Ported from a teammate's (Prathik's) prototype: one row per event,
     connecting S&P 500 volatility and gas-price volatility for the selected
@@ -876,15 +799,57 @@ def make_chart_event_dumbbell(event_window: pd.DataFrame) -> alt.LayerChart:
     )
 
 
-def make_chart1(long_index: pd.DataFrame) -> alt.Chart:
+def build_h1_lead_lag_annotations(long_index: pd.DataFrame, troughs: dict) -> pd.DataFrame:
+    """One text-label row per downturn episode ('Gas dipped first, 9 months
+    earlier' etc.), anchored to the S&P index line at the calendar year the
+    episode's later trough fell in — lets the lead/lag callout from the old
+    standalone timeline chart live directly on the indexed trend instead of
+    its own chart. Left/right text alignment is nudged near the domain edges
+    so labels for the earliest/latest downturns don't run off the chart."""
+    sp_by_year = long_index[long_index["Type"] == "S&P 500"].set_index("Year")["Index_Value"]
+    year_min, year_max = long_index["Year"].min(), long_index["Year"].max()
+    span_years = year_max - year_min
+
+    rows = []
+    for _, span in troughs["spans"].iterrows():
+        anchor_year = span["end_date"].year
+        if anchor_year not in sp_by_year.index:
+            continue
+        position = (anchor_year - year_min) / span_years if span_years else 0.5
+        align = "left" if position < 0.15 else "right" if position > 0.85 else "center"
+        rows.append({
+            "Year": anchor_year,
+            "Index_Value": sp_by_year.loc[anchor_year],
+            "Label": span["Label"],
+            "Align": align,
+        })
+    return pd.DataFrame(rows)
+
+
+def make_chart1(long_index: pd.DataFrame, troughs: dict) -> alt.Chart:
     base = alt.Chart(long_index)
     series_colors = alt.Scale(domain=["S&P 500", "Gas Prices"], range=[SP_COLOR, GAS_COLOR])
+
+    # The callout layers need to land at the S&P line's real pixel position
+    # for their year, but under top-level `resolve_scale(y="independent")`
+    # every layer gets its own separate scale — even ones sharing a field
+    # name — so a plain "let it share by default" layer would build its
+    # y-scale from only its own 4 annotation rows, not the full S&P series.
+    # A nested `alt.layer(sp500, callouts).resolve_scale(y="shared")` fixes
+    # the *positioning* (confirmed empirically) but Vega-Lite then silently
+    # drops the axis guide for that nested group's scale — no S&P axis
+    # renders at all. Fix: give the S&P line and the callouts the exact same
+    # explicit `alt.Scale(domain=...)`, so their independent per-layer
+    # scales still compute identical pixel positions, while staying flat
+    # (top-level layers) so the axis renders normally.
+    sp_values = long_index.loc[long_index["Type"] == "S&P 500", "Index_Value"]
+    sp_scale = alt.Scale(domain=[0, sp_values.max() * 1.08], nice=False)
 
     sp500 = base.transform_filter(
         {"field": "Type", "equal": "S&P 500"}
     ).mark_line(point=True).encode(
         x=alt.X("Year:O", title="Year"),
-        y=alt.Y("Index_Value:Q", title="S&P 500 index"),
+        y=alt.Y("Index_Value:Q", title="S&P 500 index", scale=sp_scale),
         color=alt.Color("Type:N", title="Series", scale=series_colors, legend=alt.Legend(orient="bottom")),
         tooltip=["Year:O", "Type:N", alt.Tooltip("Index_Value:Q", format=".1f"), "Event:N"],
     )
@@ -902,41 +867,47 @@ def make_chart1(long_index: pd.DataFrame) -> alt.Chart:
         tooltip=["Year:O", "Type:N", alt.Tooltip("Gas_Price:Q", title="Gas price ($/gallon)", format=".2f"), "Event:N"],
     )
 
-    return (sp500 + gas).resolve_scale(y="independent").properties(
+    # `align` is a static mark property in Vega-Lite, not a data-driven
+    # encoding channel, so per-row alignment needs one mark_text layer per
+    # alignment value rather than an `align` encoding.
+    annotations = build_h1_lead_lag_annotations(long_index, troughs)
+    callout_layers = [
+        alt.Chart(annotations[annotations["Align"] == align_value]).mark_text(
+            dy=-16, fontSize=11, fontWeight="bold", color=TEXT_COLOR, align=align_value,
+        ).encode(
+            x=alt.X("Year:O"),
+            y=alt.Y("Index_Value:Q", axis=None, scale=sp_scale),
+            text="Label:N",
+        )
+        for align_value in ["left", "center", "right"]
+        if (annotations["Align"] == align_value).any()
+    ]
+
+    return alt.layer(sp500, *callout_layers, gas).resolve_scale(y="independent").properties(
         title="Indexed S&P 500 vs Gas Prices",
         width="container",
-        height=360,
-        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
-    )
-
-
-def make_chart2(long_change: pd.DataFrame) -> alt.Chart:
-    return alt.Chart(long_change).mark_line(point=True).encode(
-        x=alt.X("Year:O", title="Year"),
-        y=alt.Y("Percent_Change:Q", title="Percent Change"),
-        color=alt.Color("Type:N", title="Series", legend=alt.Legend(orient="bottom")),
-        tooltip=["Year:O", "Type:N", alt.Tooltip("Percent_Change:Q", format=".1f"), "Event:N"],
-    ).properties(
-        title="Yearly Percent Change: S&P 500 vs Gas Prices",
-        width="container",
-        height=360,
+        height=380,
         autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
     )
 
 
 def make_chart3(long_change: pd.DataFrame) -> alt.Chart:
-    return alt.Chart(long_change).mark_bar(size=11).encode(
-        x=alt.X("Year:O", title="Year", scale=alt.Scale(paddingInner=0.15), axis=alt.Axis(labelAngle=-45)),
-        xOffset=alt.XOffset("Type:N"),
-        y=alt.Y("Percent_Change:Q", title="Percent Change"),
+    """Both series overlaid at the same x-position on one shared axis
+    (stack=None, reduced opacity) rather than stacked or xOffset-grouped, so
+    the two bars visibly overlap where they're close instead of sitting
+    side by side."""
+    return alt.Chart(long_change).mark_bar(size=14, opacity=0.7).encode(
+        x=alt.X("Year:O", title="Year", axis=alt.Axis(labelAngle=-45)),
+        y=alt.Y("Percent_Change:Q", title="Percent Change", stack=None),
         color=alt.Color(
             "Type:N", title="Series",
             scale=alt.Scale(domain=["S&P 500 Return", "Gas Price Change"], range=[SP_COLOR, GAS_COLOR]),
             legend=alt.Legend(orient="bottom"),
         ),
+        order=alt.Order("Type:N"),
         tooltip=["Year:O", "Type:N", alt.Tooltip("Percent_Change:Q", format=".1f"), "Event:N"],
     ).properties(
-        title="Yearly Percent Change, Grouped by Series",
+        title="Yearly Percent Change, Overlaid",
         width="container",
         height=360,
         autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
@@ -1013,8 +984,15 @@ def make_chart_h3_quadrant(annual: pd.DataFrame, view_group: alt.Parameter) -> a
     distinguishes normal from crisis years, so the question "do crisis-year
     diamonds cluster in the red zones?" can be read in one glance. Every
     point carries a permanent year label so "which dot is 2015" never
-    requires a click or a detour to the classification strip."""
-    direction_data = prepare_direction_data(annual)
+    requires a click or a detour to the classification strip. Drops the
+    dataset's first year (2000): pct_change() has no prior year to compare
+    it against, so SP_Return/Gas_Change are NaN there — left in, `NaN >= 0`
+    silently evaluates False and mislabels it "Down" for both series, which
+    then coincidentally counts as a real "Same Direction" data point with no
+    underlying data behind it. Confirmed this was inflating Hypothesis 3's
+    normal-years count (19 instead of the correct 18) and understating its
+    p-value (0.41 instead of the correct 0.66)."""
+    direction_data = prepare_direction_data(annual).dropna(subset=["SP_Return", "Gas_Change"])
     x_limit = max(10, np.ceil(direction_data["Gas_Change"].abs().max() / 5) * 5)
     y_limit = max(10, np.ceil(direction_data["SP_Return"].abs().max() / 5) * 5)
 
@@ -1114,7 +1092,7 @@ def make_chart_crisis_timeline(annual: pd.DataFrame, view_group: alt.Parameter) 
     )
 
 
-_h3_direction_data = prepare_direction_data(load_analysis_data()["annual"])
+_h3_direction_data = prepare_direction_data(load_analysis_data()["annual"]).dropna(subset=["SP_Return", "Gas_Change"])
 H3_STATS = compute_h3_significance(_h3_direction_data)
 
 _h3_section = next(s for s in sections if s["id"] == "hypothesis-3")
@@ -1146,15 +1124,13 @@ def build_chart_specs() -> dict:
     annual_h2 = load_h2_annual_data()
     h2_stats = compute_h2_correlation(annual_h2)
     chart_builders = {
-        "chart1": make_chart1(data["long_index"]),
-        "chart2": make_chart2(data["long_change"]),
+        "chart1": make_chart1(data["long_index"], troughs),
         "chart3": make_chart3(data["long_change"]),
         "chart4": make_chart4(data["annual"]),
         "chart_event_dumbbell": make_chart_event_dumbbell(event_window),
         "chart_h2_scatter": make_chart_h2_scatter_spec(annual_h2, h2_stats),
         "chart_h2_timeline": make_chart_h2_timeline_spec(annual_h2),
         "chart_h2_readout": make_chart_h2_readout_spec(annual_h2),
-        "chart_h1_timeline": make_chart_h1_timeline(troughs["points"], troughs["spans"]),
         "chart_h3_quadrant": make_chart_h3_quadrant_spec(data["annual"]),
         "chart_crisis_timeline": make_chart_crisis_timeline(data["annual"], alt.param(name="ViewGroup", value="All Years")),
     }

@@ -584,6 +584,18 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(0);
 }
 
+/* Shared by Hypothesis 2 and 3: a small tab strip that switches between the
+   main linked-panel view and a secondary chart, without disturbing the
+   linked-panel's own eager-mounted charts. */
+.chart-tab-group {
+  display: grid;
+  gap: 16px;
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
 /* Shared by Hypothesis 2 and 3: one outlined panel wrapping two linked chart
    views with a relocated, clearly-visible dropdown sandwiched between them
    instead of buried below everything. */
