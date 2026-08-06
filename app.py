@@ -148,8 +148,8 @@ sections = [
             f"One point per year, 2001–2025. Use the year-range dropdowns to zoom the scatter to a window — its {term('trend-line slope')} updates live."
         ),
         "chart_caption": "Each dot in the scatter is one year; the linked timeline below shows both measures on the same scale.",
-        "yearly_chart_id": "chart3",
-        "yearly_caption": "Both series plotted on the same axis and overlaid, so a big year for one market against the other is easy to spot.",
+        "yearly_chart_id": "chart_h2_yearly_bars",
+        "yearly_caption": "S&P 500 and gas-price yearly changes on two aligned panels sharing one scale. Hover a bar for the exact value; use the dropdown to filter by period or by whether the two moved together.",
         "finding": {
             "label": "The Finding",
             "text": "Weak, and not reliable enough to trust. Bigger stock-market swings do tend to come with slightly bigger gas-price swings, but the pattern is faint — and with only 25 years of data, we can't rule out that it's just noise.",
@@ -565,6 +565,19 @@ def make_chart_h2_timeline_ranged(annual_h2: pd.DataFrame, metric_selection: alt
         scale=alt.Scale(domain=metric_domain, range=[SP_COLOR, GAS_COLOR]),
     )
 
+    # Full-height transparent drag target for the year-range brush — wider
+    # hit area than dragging directly on the thin line marks. The brush's
+    # own domain-space interval (signal "YearBrush_d", confirmed via a
+    # throwaway vegaEmbed sandbox test) is read directly in JS and pushed
+    # into the scatter/readout views' existing YearMin/YearMax params —
+    # this avoids the documented "_store" cross-view forwarding bug (see
+    # w209-vega-lite-gotchas) by never touching the selection's store at
+    # all, only its plain derived signal.
+    year_brush = alt.selection_interval(encodings=["x"], name="YearBrush")
+    brush_target = alt.Chart(timeline_df).mark_rect(opacity=0).encode(
+        x=alt.X("Year_Date:T"),
+    ).add_params(year_brush)
+
     lines = alt.Chart(timeline_df).mark_line(strokeWidth=2.5).encode(
         x=alt.X("Year_Date:T", title="Year", axis=alt.Axis(format="%Y", tickCount=13)),
         y=alt.Y("Percent:Q", title="Annual magnitude (%)", scale=alt.Scale(zero=True)),
@@ -593,7 +606,7 @@ def make_chart_h2_timeline_ranged(annual_h2: pd.DataFrame, metric_selection: alt
         tooltip=[alt.Tooltip("Event:N", title="Selected event"), alt.Tooltip("Year:O", title="Year")],
     )
 
-    return (lines + points + selected_rule).properties(
+    return (brush_target + lines + points + selected_rule).properties(
         title=alt.TitleParams(
             text="Annual Context",
             subtitle=[
@@ -799,29 +812,32 @@ def make_chart_event_dumbbell(event_window: pd.DataFrame) -> alt.LayerChart:
     )
 
 
-def build_h1_lead_lag_annotations(long_index: pd.DataFrame, troughs: dict) -> pd.DataFrame:
-    """One text-label row per downturn episode ('Gas dipped first, 9 months
-    earlier' etc.), anchored to the S&P index line at the calendar year the
-    episode's later trough fell in — lets the lead/lag callout from the old
-    standalone timeline chart live directly on the indexed trend instead of
-    its own chart. Left/right text alignment is nudged near the domain edges
-    so labels for the earliest/latest downturns don't run off the chart."""
-    sp_by_year = long_index[long_index["Type"] == "S&P 500"].set_index("Year")["Index_Value"]
-    year_min, year_max = long_index["Year"].min(), long_index["Year"].max()
-    span_years = year_max - year_min
+def build_h1_trough_markers(long_index: pd.DataFrame, troughs: dict) -> pd.DataFrame:
+    """One marker row per (episode, market) — 8 rows total — placed at each
+    series' own actual trough point (not a shared/averaged anchor), so the
+    S&P marker sits on the S&P line's real value that year and the gas
+    marker sits on the gas line's real value that year. Carries the same
+    'who dipped first' text used previously as always-visible chart labels,
+    now surfaced only via tooltip on these markers instead — testers found
+    the always-on text cluttered the chart (Robert/Prathik feedback,
+    2026-08-05)."""
+    sp_by_year = long_index[long_index["Type"] == "S&P 500"].drop_duplicates("Year").set_index("Year")["Index_Value"]
+    gas_by_year = long_index.drop_duplicates("Year").set_index("Year")["Gas_Price"]
+    lead_lag_by_episode = troughs["spans"].set_index("Episode")["Label"]
 
     rows = []
-    for _, span in troughs["spans"].iterrows():
-        anchor_year = span["end_date"].year
-        if anchor_year not in sp_by_year.index:
+    for _, point in troughs["points"].iterrows():
+        year = point["Trough Date"].year
+        by_year = sp_by_year if point["Market"] == "S&P 500" else gas_by_year
+        if year not in by_year.index:
             continue
-        position = (anchor_year - year_min) / span_years if span_years else 0.5
-        align = "left" if position < 0.15 else "right" if position > 0.85 else "center"
         rows.append({
-            "Year": anchor_year,
-            "Index_Value": sp_by_year.loc[anchor_year],
-            "Label": span["Label"],
-            "Align": align,
+            "Episode": point["Episode"],
+            "Market": point["Market"],
+            "Year": year,
+            "Value": by_year.loc[year],
+            "Trough Date": point["Trough Date"],
+            "Lead_Lag": lead_lag_by_episode.loc[point["Episode"]],
         })
     return pd.DataFrame(rows)
 
@@ -843,7 +859,9 @@ def make_chart1(long_index: pd.DataFrame, troughs: dict) -> alt.Chart:
     # scales still compute identical pixel positions, while staying flat
     # (top-level layers) so the axis renders normally.
     sp_values = long_index.loc[long_index["Type"] == "S&P 500", "Index_Value"]
+    gas_values = long_index["Gas_Price"]
     sp_scale = alt.Scale(domain=[0, sp_values.max() * 1.08], nice=False)
+    gas_scale = alt.Scale(domain=[0, gas_values.max() * 1.08], nice=False)
 
     sp500 = base.transform_filter(
         {"field": "Type", "equal": "S&P 500"}
@@ -861,29 +879,46 @@ def make_chart1(long_index: pd.DataFrame, troughs: dict) -> alt.Chart:
         y=alt.Y(
             "Gas_Price:Q",
             title="Gas price ($/gallon)",
+            scale=gas_scale,
             axis=alt.Axis(orient="right"),
         ),
         color=alt.Color("Type:N", title="Series", scale=series_colors, legend=None),
         tooltip=["Year:O", "Type:N", alt.Tooltip("Gas_Price:Q", title="Gas price ($/gallon)", format=".2f"), "Event:N"],
     )
 
-    # `align` is a static mark property in Vega-Lite, not a data-driven
-    # encoding channel, so per-row alignment needs one mark_text layer per
-    # alignment value rather than an `align` encoding.
-    annotations = build_h1_lead_lag_annotations(long_index, troughs)
-    callout_layers = [
-        alt.Chart(annotations[annotations["Align"] == align_value]).mark_text(
-            dy=-16, fontSize=11, fontWeight="bold", color=TEXT_COLOR, align=align_value,
-        ).encode(
-            x=alt.X("Year:O"),
-            y=alt.Y("Index_Value:Q", axis=None, scale=sp_scale),
-            text="Label:N",
-        )
-        for align_value in ["left", "center", "right"]
-        if (annotations["Align"] == align_value).any()
+    # Hoverable "who dipped first" markers, one per (episode, market) — 8
+    # total — placed at each series' own real trough point instead of an
+    # always-visible text label cluttering the chart (Robert/Prathik
+    # feedback: the static text was hard to read and overlapped the lines).
+    # A distinct diamond shape + white outline + larger size makes these 8
+    # points visually stand out from the regular line points; the "who
+    # dipped first" text only shows up in the tooltip on hover.
+    markers = build_h1_trough_markers(long_index, troughs)
+    hover_marker = alt.selection_point(on="pointerover", clear="pointerout", empty=False)
+    marker_tooltip = [
+        alt.Tooltip("Episode:N", title="Downturn"),
+        alt.Tooltip("Market:N", title="Market"),
+        alt.Tooltip("Trough Date:T", title="Bottomed out", format="%B %Y"),
+        alt.Tooltip("Lead_Lag:N", title="Who dipped first"),
     ]
+    sp_markers = alt.Chart(markers[markers["Market"] == "S&P 500"]).add_params(hover_marker).mark_point(
+        shape="diamond", size=170, filled=True, color=SP_COLOR, stroke=TEXT_COLOR, strokeWidth=1.5,
+    ).encode(
+        x=alt.X("Year:O"),
+        y=alt.Y("Value:Q", axis=None, scale=sp_scale),
+        size=alt.condition(hover_marker, alt.value(280), alt.value(170)),
+        tooltip=marker_tooltip,
+    )
+    gas_markers = alt.Chart(markers[markers["Market"] == "Gas Price"]).add_params(hover_marker).mark_point(
+        shape="diamond", size=170, filled=True, color=GAS_COLOR, stroke=TEXT_COLOR, strokeWidth=1.5,
+    ).encode(
+        x=alt.X("Year:O"),
+        y=alt.Y("Value:Q", axis=None, scale=gas_scale),
+        size=alt.condition(hover_marker, alt.value(280), alt.value(170)),
+        tooltip=marker_tooltip,
+    )
 
-    return alt.layer(sp500, *callout_layers, gas).resolve_scale(y="independent").properties(
+    return alt.layer(sp500, gas, sp_markers, gas_markers).resolve_scale(y="independent").properties(
         title="Indexed S&P 500 vs Gas Prices",
         width="container",
         height=380,
@@ -891,26 +926,110 @@ def make_chart1(long_index: pd.DataFrame, troughs: dict) -> alt.Chart:
     )
 
 
-def make_chart3(long_change: pd.DataFrame) -> alt.Chart:
-    """Both series overlaid at the same x-position on one shared axis
-    (stack=None, reduced opacity) rather than stacked or xOffset-grouped, so
-    the two bars visibly overlap where they're close instead of sitting
-    side by side."""
-    return alt.Chart(long_change).mark_bar(size=14, opacity=0.7).encode(
-        x=alt.X("Year:O", title="Year", axis=alt.Axis(labelAngle=-45)),
-        y=alt.Y("Percent_Change:Q", title="Percent Change", stack=None),
+def make_chart_h2_yearly_bars(annual_h2: pd.DataFrame) -> alt.FacetChart:
+    """Two aligned per-series bar panels (S&P 500 / gas prices) on one
+    shared percentage scale, with a hover-highlight band and value label.
+    Adapted from a teammate's (Prathik's) notebook prototype — ported here
+    rather than copied verbatim because his version read a separate
+    workbook that doesn't exist in this repo (with its own hand-typed
+    9-year event dict, inconsistent with the app's real 52-event data) and
+    used hardcoded colors/theme config that would fight this site's global
+    Vega-Lite theme. Reuses `annual_h2` (already loaded for H2's
+    scatter/timeline tab) instead: same real per-year event labels, same
+    SP_Return/Gas_Change fields, and the same 2001-2025 range (its NaN
+    first-year row is already excluded upstream, same fix as H3's)."""
+    annual = annual_h2.copy()
+    annual["Direction"] = np.where(
+        annual["SP_Return"] * annual["Gas_Change"] > 0, "Years moving together", "Years moving opposite",
+    )
+    annual["Is_Major_Event"] = annual["Event_Status"].eq("Major-event year")
+
+    sp_rows = annual.copy()
+    sp_rows["Series"] = "S&P 500"
+    sp_rows["Percent_Change"] = sp_rows["SP_Return"]
+
+    gas_rows = annual.copy()
+    gas_rows["Series"] = "CA gas prices"
+    gas_rows["Percent_Change"] = gas_rows["Gas_Change"]
+
+    chart_data = pd.concat([sp_rows, gas_rows], ignore_index=True)
+    chart_data["Value_Label"] = chart_data["Percent_Change"].map(lambda v: f"{v:+.1f}%")
+
+    period_options = [
+        "All years", "2001–2009", "2010–2019", "2020–2025",
+        "Major-event years", "Years moving together", "Years moving opposite",
+    ]
+    period_filter = alt.param(
+        name="PeriodView", value="All years",
+        bind=alt.binding_select(options=period_options, name="Show: "),
+    )
+    filter_expression = """
+        PeriodView == 'All years' ||
+        (PeriodView == '2001–2009' && datum.Year >= 2001 && datum.Year <= 2009) ||
+        (PeriodView == '2010–2019' && datum.Year >= 2010 && datum.Year <= 2019) ||
+        (PeriodView == '2020–2025' && datum.Year >= 2020 && datum.Year <= 2025) ||
+        (PeriodView == 'Major-event years' && datum.Is_Major_Event) ||
+        (PeriodView == 'Years moving together' && datum.Direction == 'Years moving together') ||
+        (PeriodView == 'Years moving opposite' && datum.Direction == 'Years moving opposite')
+    """
+    hover = alt.selection_point(name="HoverYear", fields=["Year"], on="pointerover", clear="pointerout", empty=False)
+
+    axis_limit = int(np.ceil(chart_data["Percent_Change"].abs().max() / 5) * 5 + 5)
+    shared_y_scale = alt.Scale(domain=[-axis_limit, axis_limit], nice=False)
+
+    tooltip = [
+        alt.Tooltip("Year:O", title="Year"),
+        alt.Tooltip("Series:N", title="Series"),
+        alt.Tooltip("Percent_Change:Q", title="Yearly change", format="+.1f"),
+        alt.Tooltip("Direction:N", title="Direction comparison"),
+        alt.Tooltip("Event:N", title="Major event"),
+        alt.Tooltip("Category:N", title="Category"),
+    ]
+
+    base = alt.Chart(chart_data).add_params(period_filter, hover).transform_filter(filter_expression)
+
+    hover_band = base.transform_filter(hover).mark_rect(color=TEXT_COLOR, opacity=0.07).encode(x=alt.X("Year:O"))
+
+    bars = base.mark_bar(cornerRadiusEnd=3, size=24).encode(
+        x=alt.X("Year:O", title="Year", sort="ascending", axis=alt.Axis(labelAngle=-45, labelPadding=5, tickSize=0)),
+        y=alt.Y("Percent_Change:Q", title="Year-over-year change (%)", scale=shared_y_scale, axis=alt.Axis(format="+d", tickCount=9)),
         color=alt.Color(
-            "Type:N", title="Series",
-            scale=alt.Scale(domain=["S&P 500 Return", "Gas Price Change"], range=[SP_COLOR, GAS_COLOR]),
-            legend=alt.Legend(orient="bottom"),
+            "Series:N", title=None,
+            scale=alt.Scale(domain=["S&P 500", "CA gas prices"], range=[SP_COLOR, GAS_COLOR]),
+            legend=None,
         ),
-        order=alt.Order("Type:N"),
-        tooltip=["Year:O", "Type:N", alt.Tooltip("Percent_Change:Q", format=".1f"), "Event:N"],
-    ).properties(
-        title="Yearly Percent Change, Overlaid",
-        width="container",
-        height=360,
-        autosize=alt.AutoSizeParams(type="fit-x", contains="padding"),
+        opacity=alt.condition(hover, alt.value(1), alt.value(0.86)),
+        stroke=alt.condition("datum.Is_Major_Event", alt.value(TEXT_COLOR), alt.value("transparent")),
+        strokeWidth=alt.condition("datum.Is_Major_Event", alt.value(1.2), alt.value(0)),
+        tooltip=tooltip,
+    )
+
+    zero_line = base.mark_rule(color=MUTED_COLOR, strokeWidth=1.25, opacity=0.9).encode(y=alt.datum(0))
+
+    hover_value = base.transform_filter(hover).mark_text(
+        dy=-9, fontSize=12, fontWeight=600, color=TEXT_COLOR,
+    ).encode(x=alt.X("Year:O", sort="ascending"), y=alt.Y("Percent_Change:Q", scale=shared_y_scale), text="Value_Label:N")
+
+    # `width="container"` alone works fine on a facet's inner spec (confirmed
+    # empirically) — but pairing it with the `autosize=fit-x` trick used
+    # elsewhere in this file for wide-legend charts renders the whole facet
+    # at width 0. Facet composition just doesn't support that combination,
+    # so it's deliberately omitted here.
+    return alt.layer(hover_band, bars, zero_line, hover_value).properties(
+        width="container", height=200,
+    ).facet(
+        row=alt.Row(
+            "Series:N", sort=["S&P 500", "CA gas prices"], title=None,
+            header=alt.Header(labelOrient="top", labelAnchor="start", labelFontSize=15, labelFontWeight=600, labelPadding=6),
+        ),
+    ).resolve_scale(y="shared").properties(
+        title=alt.TitleParams(
+            text="Yearly Change in the S&P 500 and California Gas Prices",
+            subtitle=[
+                "Both panels use the same percentage scale, so bar heights are directly comparable.",
+                "Above zero = increase; below zero = decrease. Hover a bar for exact values. Outlined bars mark major-event years.",
+            ],
+        ),
     )
 
 
@@ -1125,7 +1244,7 @@ def build_chart_specs() -> dict:
     h2_stats = compute_h2_correlation(annual_h2)
     chart_builders = {
         "chart1": make_chart1(data["long_index"], troughs),
-        "chart3": make_chart3(data["long_change"]),
+        "chart_h2_yearly_bars": make_chart_h2_yearly_bars(annual_h2),
         "chart4": make_chart4(data["annual"]),
         "chart_event_dumbbell": make_chart_event_dumbbell(event_window),
         "chart_h2_scatter": make_chart_h2_scatter_spec(annual_h2, h2_stats),
