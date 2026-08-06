@@ -30,7 +30,7 @@ EPISODE_COLORS = {              # the crisis strip needs 4 distinct episode colo
 GLOSSARY = {
     "indexed value": "Value scaled so the starting year equals 100, so two series with different units (dollars vs. gallons) can be compared on the same relative scale.",
     "percent change": "The size of a move from one period to the next, expressed as a percentage of the starting value.",
-    "volatility": "How much a price bounces around during a period, not just where it ends up — a market that swings wildly but nets out flat is still volatile.",
+    "volatility": "How much a price bounces around during a period, not just where it ends up. For example, a market that swings wildly but nets out flat is still volatile.",
     "trend-line slope": "The steepness of the fitted line: how much the y-value changes, on average, for each one-unit increase in the x-value.",
     "crisis year": "A year that falls between when gas and the S&P actually bottomed out during one of four major downturns (Dot-Com, 2008 Financial Crisis, COVID-19, the 2022 selloff).",
 }
@@ -102,8 +102,8 @@ sections = [
         "id": "cover",
         "type": "hero",
         "eyebrow": "Robert Gao, Prathik Kakarlamudi, Martin Dela Cruz",
-        "title": "Uh-oh, Gas Prices.<br>Uh-oh, Stock Market?",
-        "subtitle": "“Gas prices are up — is everything else about to go up too?” You've heard some version of this. It's a reasonable instinct: gas is the one economic number most of us actually notice. We checked it against 25 years of real data — and the answer is messier than the dinner-table version.",
+        "title": "From Pump Prices <br>to Global Crises",
+        "subtitle": "“Gas prices are up, is everything else about to go up too?” You’ve heard some version of this. It’s a reasonable instinct: gas is the one economic number most of us actually notice. We checked it against 25 years of real data and the answer is messier than the dinner-table version.",
         "summary": "Let's find out if gas prices can reliably tell us anything about the economy.",
     },
     {
@@ -111,13 +111,13 @@ sections = [
         "type": "story",
         "eyebrow": "01 • Introduction",
         "title": "Why this relationship matters",
-        "description": "That gut feeling — gas prices as a stand-in for how the whole economy is doing — is worth actually checking instead of just repeating. So we asked it three ways, in order, each one a fallback for when the last one didn't give us a clean answer.",
+        "description": "That gut feeling is that gas prices are a stand-in for how the whole economy is doing and is worth actually checking instead of just repeating. So we asked it three ways, in order, each one a fallback for when the last one didn’t give us a clean answer.",
         "audience_label": "Who this is for",
-        "audience": "This is a starter to folks who are curious about the economy but have been using a single number — gas prices — to gauge its overall health, and want to know if this holds up.",
+        "audience": "This is a starter to those who are curious about the economy but have been using a single number in gas prices to gauge its overall health, and want to know if this holds up.",
         "highlights": [
             "First, the most direct version: does a gas-price move happen before a stock-market move?",
             "If not timing, maybe intensity: do bigger stock-market swings come with bigger gas-price swings?",
-            "If not that either, the simplest version: do they normally move together — and what happened when they didn't?"
+            "If not that either, the simplest version: do they normally move together, and what happened when they didn't?"
         ],
         "next": {"id": "hypothesis-1", "label": "Question 1: Does gas lead the market down?"},
     },
@@ -126,13 +126,13 @@ sections = [
         "type": "hypothesis",
         "eyebrow": "02 • Question 1",
         "title": "Does a gas-price dip really happen before a stock-market dip?",
-        "description": "Gas prices are often treated like a warning light — climbing before a downturn hits. The chart below tracks the indexed S&P 500 against gas prices since 2000. Hover a marker on each of the last four downturns to see which one dipped first.",
+        "description": "Gas prices are often treated like a warning light. The chart below tracks the indexed S&P 500 against gas prices since 2000. Hover a marker on each of the last four downturns to see which one dipped first.",
         "chart_id": "chart1",
         "chart_caption": "Indexed S&P 500 vs. gas prices. Hover a marker for who dipped first.",
         "chart_source": "Source: S&P 500 monthly close, Yahoo Finance; CA gas prices, U.S. EIA.",
         "finding": {
             "label": "The Finding",
-            "text": "No — a gas-price dip doesn't reliably come before a stock-market dip. Sometimes gas led, sometimes the S&P 500 did, with no consistent pattern.",
+            "text": "No, a gas-price dip doesn't reliably come before a stock-market dip. Sometimes gas led, sometimes the S&P 500 did, with no consistent pattern.",
         },
         "next": {"id": "hypothesis-2", "label": "Question 2: Do bigger gains mean bigger gas swings?"},
     },
@@ -142,7 +142,7 @@ sections = [
         "eyebrow": "03 • Question 2",
         "title": "Do bigger stock market swings come with bigger gas-price swings?",
         "description": (
-            f"Timing gave us nothing — so what about {term('volatility')}? Each dot/bar below is one year, plotting how much the S&P 500 swung against how much gas prices swung that same year. "),
+            f"Timing gave us nothing, but what about {term('volatility')}? Each dot/bar below is one year, plotting how much the S&P 500 swung against how much gas prices swung that same year. "),
         "chart_source": "Source: S&P 500 & CA gas prices, Yahoo Finance / U.S. EIA; event list compiled by the project team.",
         "yearly_chart_id": "chart_h2_yearly_bars",
         "yearly_caption": "The same data, year by year. Hover a bar for the exact value.",
@@ -162,7 +162,7 @@ sections = [
             f"What about direction? Do gas prices and the S&P 500 normally move the same direction, and does that break during a {term('crisis year')}? "
             "The strip below shows how each year is classified; the scatter shows how often the two markets actually agreed."
         ),
-        "chart_caption": "Each point is one year — color shows same vs. opposite direction, shape shows normal vs. crisis year.",
+        "chart_caption": "Each point is one year. color shows same vs. opposite direction, shape shows normal vs. crisis year.",
         "chart_source": "Source: S&P 500 monthly close, Yahoo Finance; CA gas prices, U.S. EIA.",
         "dumbbell_chart_id": "chart_event_dumbbell",
         "dumbbell_caption": "Every tracked event, ranked by the volatility gap between the two markets.",
@@ -173,7 +173,7 @@ sections = [
         },
         "metrics": [],
         "technical_details": "",
-        "event_impact_transition": "So what actually breaks that pattern? Here's exactly which events moved each market, and by how much — tile size shows the size of the move, color shows the direction.",
+        "event_impact_transition": "So what actually breaks that pattern? Here's exactly which events moved each market, and by how much. The tile size shows the size of the move, color shows the direction.",
         "event_impact_caption": "Switch the metric or adjust the window to see how the impact compounds or fades over time.",
         "next": {"id": "conclusion", "label": "See the full conclusion"},
     },
@@ -184,9 +184,9 @@ sections = [
         "title": "What the data shows",
         "description": "Gas prices are always a good conversation starter, but not always a good indicator of the entire economy. Many events and other factors affect the market, but there is not a single clear winner.",
         "highlights": [
-            "Does gas lead the market down? No — across the major downturns, the lead varied both ways.",
+            "Does gas lead the market down? No. across the major downturns, the lead varied both ways.",
             "Do bigger market swings mean bigger gas swings? Not reliably all the time, and we've tried discovering why.",
-            "Does a crisis break the link? Maybe — normal years moved together more often than crisis years, but there aren't enough crisis years to be confident it's real."
+            "Does a crisis break the link? Maybe. normal years moved together more often than crisis years, but there aren't enough crisis years to be confident it's real."
         ],
     },
 ]
@@ -793,7 +793,7 @@ def make_chart_event_dumbbell(event_window: pd.DataFrame) -> alt.LayerChart:
         title=alt.TitleParams(
             text="How Volatile Were Stocks and Gas Prices After Each Major Event?",
             subtitle=[
-                "All 52 tracked events, ordered by date. Farther right means more volatility; shorter connectors mean more similar reactions.",
+                "Farther right means more volatility; shorter connectors mean more similar reactions.",
                 "Hover for exact values. Click an event to focus it; double-click to reset.",
             ],
         ),
@@ -1156,7 +1156,7 @@ def make_chart_h3_quadrant(annual: pd.DataFrame, view_group: alt.Parameter) -> a
             text="How Did Gas Prices and the S&P 500 Move Each Year?",
             subtitle=[
                 "Green quadrants = moved the same direction. Red quadrants = moved opposite.",
-                "Circles = normal years, diamonds = crisis years — every point is labeled with its year.",
+                "Circles = normal years, diamonds = crisis years; every point is labeled with its year.",
             ],
         ),
         width="container",
