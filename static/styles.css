@@ -374,6 +374,17 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
 }
 
+/* Deliberately smaller/fainter than .hero-chart-caption — a citation, not
+   part of the "how to read this chart" instruction, so it doesn't compete
+   for attention with the trimmed interaction copy above it. */
+.chart-source {
+  margin: 4px 0 0;
+  color: var(--muted);
+  opacity: 0.65;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
 .finding-callout {
   margin-top: 14px;
   padding: 14px 18px;
@@ -393,6 +404,35 @@ a { color: inherit; text-decoration: none; }
 }
 
 .finding-callout p {
+  margin: 0;
+  font-size: 1.04rem;
+  color: var(--text);
+  line-height: 1.55;
+  text-align: left;
+}
+
+/* Same "labeled callout" shape as .finding-callout, in the site's other
+   brand color (gas blue, not S&P orange) so a framing note reads as
+   distinct from an in-narrative data finding. */
+.audience-callout {
+  margin-top: 20px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border-left: 4px solid #4C78A8;
+  background: linear-gradient(90deg, rgba(76,120,168,0.16), rgba(76,120,168,0.03));
+}
+
+.audience-label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7fa8d9;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.audience-callout p {
   margin: 0;
   font-size: 1.04rem;
   color: var(--text);

@@ -101,10 +101,10 @@ sections = [
     {
         "id": "cover",
         "type": "hero",
-        "eyebrow": "W209 • Data Visualization",
-        "title": "Uh-oh Gas Prices. Uh-oh, Stock Market?",
+        "eyebrow": "Robert Gao, Prathik Kakarlamudi, Martin Dela Cruz",
+        "title": "Uh-oh, Gas Prices.<br>Uh-oh, Stock Market?",
         "subtitle": "“Gas prices are up — is everything else about to go up too?” You've heard some version of this. It's a reasonable instinct: gas is the one economic number most of us actually notice. We checked it against 25 years of real data — and the answer is messier than the dinner-table version.",
-        "summary": "Let's find out if gas prices can tell us anything about the economy.",
+        "summary": "Let's find out if gas prices can reliably tell us anything about the economy.",
     },
     {
         "id": "introduction",
@@ -112,6 +112,8 @@ sections = [
         "eyebrow": "01 • Introduction",
         "title": "Why this relationship matters",
         "description": "That gut feeling — gas prices as a stand-in for how the whole economy is doing — is worth actually checking instead of just repeating. So we asked it three ways, in order, each one a fallback for when the last one didn't give us a clean answer.",
+        "audience_label": "Who this is for",
+        "audience": "This is a starter to folks who are curious about the economy but have been using a single number — gas prices — to gauge its overall health, and want to know if this holds up.",
         "highlights": [
             "First, the most direct version: does a gas-price move happen before a stock-market move?",
             "If not timing, maybe intensity: do bigger stock-market swings come with bigger gas-price swings?",
@@ -124,17 +126,14 @@ sections = [
         "type": "hypothesis",
         "eyebrow": "02 • Question 1",
         "title": "Does a gas-price dip really happen before a stock-market dip?",
-        "description": "The everyday version of this: gas prices climbing before a downturn, like a warning light. We tested that literally, during the four biggest downturns since 2001 — the moments a warning sign would matter most. Annual averages can't show monthly timing, so instead we found the exact month each market actually bottomed out, and compared the dates directly.",
+        "description": "Gas prices are often treated like a warning light — climbing before a downturn hits. The chart below tracks the indexed S&P 500 against gas prices since 2000. Hover a marker on each of the last four downturns to see which one dipped first.",
         "chart_id": "chart1",
-        "chart_caption": "The S&P 500 and gas prices indexed to the same starting point, with callouts marking which market bottomed out first in each of the four downturns.",
+        "chart_caption": "Indexed S&P 500 vs. gas prices. Hover a marker for who dipped first.",
+        "chart_source": "Source: S&P 500 monthly close, Yahoo Finance; CA gas prices, U.S. EIA.",
         "finding": {
             "label": "The Finding",
-            "text": "No. Gas bottomed out first in 2 of the 4 downturns, and the S&P 500 did in the other 2 — sometimes gas led by months, sometimes stocks did. There's no reliable pattern either way.",
+            "text": "No — a gas-price dip doesn't reliably come before a stock-market dip. Sometimes gas led, sometimes the S&P 500 did, with no consistent pattern.",
         },
-        "metrics": [
-            {"value": "No consistent leader", "label": "gas dipped first in 2 of 4 downturns, the S&P 500 in the other 2"},
-            {"value": "Not supported", "label": "no reliable lead-lag pattern across 25 years"},
-        ],
         "next": {"id": "hypothesis-2", "label": "Question 2: Do bigger gains mean bigger gas swings?"},
     },
     {
@@ -143,22 +142,15 @@ sections = [
         "eyebrow": "03 • Question 2",
         "title": "Do bigger stock market swings come with bigger gas-price swings?",
         "description": (
-            f"Timing didn't give us a clear signal — so what about intensity? {term('Volatility', 'volatility')} means how much a price bounces around, not just where it ends up — a market that swings wildly but nets out flat is still volatile. "
-            "Here we measure it annually: S&P 500 volatility is the annualized standard deviation of monthly returns for that year, and gas volatility is the absolute year-over-year change in the average California gas price. "
-            f"One point per year, 2001–2025. Use the year-range dropdowns to zoom the scatter to a window — its {term('trend-line slope')} updates live."
-        ),
-        "chart_caption": "Each dot in the scatter is one year; the linked timeline below shows both measures on the same scale.",
+            f"Timing gave us nothing — so what about {term('volatility')}? Each dot/bar below is one year, plotting how much the S&P 500 swung against how much gas prices swung that same year. "),
+        "chart_source": "Source: S&P 500 & CA gas prices, Yahoo Finance / U.S. EIA; event list compiled by the project team.",
         "yearly_chart_id": "chart_h2_yearly_bars",
-        "yearly_caption": "S&P 500 and gas-price yearly changes on two aligned panels sharing one scale. Hover a bar for the exact value; use the dropdown to filter by period or by whether the two moved together.",
+        "yearly_caption": "The same data, year by year. Hover a bar for the exact value.",
+        "yearly_source": "Source: S&P 500 & CA gas prices, Yahoo Finance / U.S. EIA; event list compiled by the project team.",
         "finding": {
             "label": "The Finding",
-            "text": "Weak, and not reliable enough to trust. Bigger stock-market swings do tend to come with slightly bigger gas-price swings, but the pattern is faint — and with only 25 years of data, we can't rule out that it's just noise.",
+            "text": "Bigger stock swings do tend to come with slightly bigger gas swings, but the pattern is faint.",
         },
-        "metrics": [
-            {"value": "Weak signal", "label": "a hint of the pattern, not strong evidence"},
-            {"value": "Not reliable", "label": "25 years isn't enough to rule out noise"},
-        ],
-        "technical_details": "Pearson r = 0.31 (95% CI: -0.10 to 0.63), p = 0.136. The correlation doesn't clear the standard bar for statistical significance, and the confidence interval crosses zero.",
         "next": {"id": "hypothesis-3", "label": "Question 3: Do crises break the link?"},
     },
     {
@@ -167,20 +159,21 @@ sections = [
         "eyebrow": "04 • Question 3",
         "title": "Does the normal link between gas prices and stocks hold up during a crisis?",
         "description": (
-            "Timing and intensity both came back murky — so here's the simplest version: in an average year, do gas prices and the S&P 500 at least move in the same direction, like parallel lanes? And does that break down during a crisis? "
-            f"To keep {term('crisis year')} consistent with Question 1 instead of picking a separate list, a year counts as one here only if it falls between when gas and the S&P actually bottomed out during one of the same four downturns from Question 1 (the Dot-Com Crash, the 2008 Financial Crisis, COVID-19, and the 2022 selloff). "
-            "That gives 7 crisis years and 18 normal years, which we compared (2000 is excluded — there's no prior year to measure its year-over-year change against)."
+            f"What about direction? Do gas prices and the S&P 500 normally move the same direction, and does that break during a {term('crisis year')}? "
+            "The strip below shows how each year is classified; the scatter shows how often the two markets actually agreed."
         ),
-        "chart_caption": "Every point in the scatter is labeled with its year. Quadrant color tells you \"same\" from \"opposite\" directly; circles are normal years, diamonds are crisis years.",
+        "chart_caption": "Each point is one year — color shows same vs. opposite direction, shape shows normal vs. crisis year.",
+        "chart_source": "Source: S&P 500 monthly close, Yahoo Finance; CA gas prices, U.S. EIA.",
         "dumbbell_chart_id": "chart_event_dumbbell",
-        "dumbbell_caption": "All 52 tracked events, one row each, connecting S&P 500 and gas-price volatility for the selected window.",
+        "dumbbell_caption": "Every tracked event, ranked by the volatility gap between the two markets.",
+        "dumbbell_source": "Source: S&P 500 & CA gas prices, Yahoo Finance / U.S. EIA; event list compiled by the project team.",
         "finding": {
             "label": "The Finding",
-            "text": "Inconclusive. Gas prices and the S&P 500 moved together 61% of the time in normal years, but only 43% of the time during a crisis — a modest gap, in the direction we'd expect. But there are only 7 crisis years to check against, so we can't be confident it's a real effect and not just chance.",
+            "text": "The two moved together less often during a crisis (43% vs. 61%). Below is another way to see the impact of these events.",
         },
         "metrics": [],
         "technical_details": "",
-        "event_impact_transition": "So what actually breaks that pattern? A percentage only tells you so much — here's exactly which events moved each market, and by how much. Each tile below is a major event since 2001; tile size shows how big the move was, color shows which direction.",
+        "event_impact_transition": "So what actually breaks that pattern? Here's exactly which events moved each market, and by how much — tile size shows the size of the move, color shows the direction.",
         "event_impact_caption": "Switch the metric or adjust the window to see how the impact compounds or fades over time.",
         "next": {"id": "conclusion", "label": "See the full conclusion"},
     },
@@ -188,11 +181,11 @@ sections = [
         "id": "conclusion",
         "type": "story",
         "eyebrow": "05 • Conclusion",
-        "title": "What the data actually shows",
-        "description": "All three answers point the same way: gas prices don't reliably predict or track the stock market. One question came back a clear no; the other two showed only faint hints that don't hold up once you account for how little data there is. That consistency is itself the finding — the relationship isn't the strong, reliable story it's often assumed to be.",
+        "title": "What the data shows",
+        "description": "Gas prices are always a good conversation starter, but not always a good indicator of the entire economy. Many events and other factors affect the market, but there is not a single clear winner.",
         "highlights": [
-            "Does gas lead the market down? No — across four major downturns, the lead varied both ways.",
-            "Do bigger market swings mean bigger gas swings? Only weakly — there's a hint of a pattern, but not enough data to trust it.",
+            "Does gas lead the market down? No — across the major downturns, the lead varied both ways.",
+            "Do bigger market swings mean bigger gas swings? Not reliably all the time, and we've tried discovering why.",
             "Does a crisis break the link? Maybe — normal years moved together more often than crisis years, but there aren't enough crisis years to be confident it's real."
         ],
     },
@@ -511,8 +504,6 @@ def make_chart_h2_scatter_ranged(annual_h2: pd.DataFrame, stats: dict, year_min:
             text="Do Volatile Stock-Market Years Coincide With Larger Gas-Price Swings?",
             subtitle=[
                 "Each point is one year (2001-2025); the dashed line is the overall linear trend.",
-                f"Pearson r = {stats['r']:.2f}, 95% CI [{stats['ci_low']:.2f}, {stats['ci_high']:.2f}], "
-                f"p = {stats['p_value']:.3f}, n = {stats['n']}.",
             ],
         ),
         width="container",
@@ -610,7 +601,7 @@ def make_chart_h2_timeline_ranged(annual_h2: pd.DataFrame, metric_selection: alt
         title=alt.TitleParams(
             text="Annual Context",
             subtitle=[
-                "Both measures use the same percentage scale — no dual axes.",
+                "Drag the timeline to zoom the scatter to a range, or use the dropdowns.",
                 "Click a metric in the legend to emphasize or de-emphasize it.",
             ],
         ),
@@ -1026,8 +1017,7 @@ def make_chart_h2_yearly_bars(annual_h2: pd.DataFrame) -> alt.FacetChart:
         title=alt.TitleParams(
             text="Yearly Change in the S&P 500 and California Gas Prices",
             subtitle=[
-                "Both panels use the same percentage scale, so bar heights are directly comparable.",
-                "Above zero = increase; below zero = decrease. Hover a bar for exact values. Outlined bars mark major-event years.",
+                "Above zero = increase; below zero = decrease. Hover a bar for exact values.",
             ],
         ),
     )
@@ -1215,16 +1205,6 @@ _h3_direction_data = prepare_direction_data(load_analysis_data()["annual"]).drop
 H3_STATS = compute_h3_significance(_h3_direction_data)
 
 _h3_section = next(s for s in sections if s["id"] == "hypothesis-3")
-_h3_section["metrics"] = [
-    {
-        "value": f"{H3_STATS['normal_same']} of {H3_STATS['normal_total']} normal years — {H3_STATS['normal_rate']:.0f}%",
-        "label": "moved in the same direction",
-    },
-    {
-        "value": f"{H3_STATS['crisis_same']} of {H3_STATS['crisis_total']} crisis years — {H3_STATS['crisis_rate']:.0f}%",
-        "label": "moved in the same direction",
-    },
-]
 _h3_section["technical_details"] = (
     f"Fisher's exact test: p = {H3_STATS['p_value']:.3f}. 95% confidence intervals — "
     f"normal years: [{H3_STATS['normal_ci'][0]:.0f}%, {H3_STATS['normal_ci'][1]:.0f}%]; "

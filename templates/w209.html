@@ -50,7 +50,7 @@
         {% if section.type == 'hero' %}
         <div class="hero-copy">
           <p class="eyebrow">{{ section.eyebrow }}</p>
-          <h1>{{ section.title }}</h1>
+          <h1>{{ section.title | safe }}</h1>
           <p class="hero-summary">{{ section.subtitle }}</p>
           <p class="hero-summary hero-summary-muted">{{ section.summary }}</p>
           <div class="hero-actions">
@@ -84,10 +84,10 @@
         <div class="chart-tab-group">
           <div class="explorer-picker" role="tablist" aria-label="Chart view selector">
             <button type="button" class="explorer-btn active" data-tab-target="h2-panel-main">
-              <span>Scatter &amp; timeline</span>
+              <span>Scatter &amp; Timeline</span>
             </button>
             <button type="button" class="explorer-btn" data-tab-target="h2-panel-yearly">
-              <span>Yearly bars</span>
+              <span>Yearly Change</span>
             </button>
           </div>
           <div class="tab-panel" id="h2-panel-main">
@@ -119,16 +119,17 @@
               </div>
               <div class="hero-chart-panel">
                 <div class="hero-chart-visual vega-chart-manual" id="h2-timeline" data-chart="chart_h2_timeline"></div>
-                <p class="drag-hint">Drag across the timeline to zoom the scatter to a year range — or use the dropdowns above.</p>
               </div>
             </div>
             <p class="hero-chart-caption">{{ section.chart_caption }}</p>
+            {% if section.chart_source %}<p class="chart-source">{{ section.chart_source }}</p>{% endif %}
           </div>
           <div class="tab-panel" id="h2-panel-yearly" hidden>
             <div class="hero-chart-panel">
               <div class="hero-chart-visual vega-chart-lazy" data-chart="{{ section.yearly_chart_id }}" data-aria-label="{{ section.yearly_caption }}"></div>
             </div>
             <p class="hero-chart-caption">{{ section.yearly_caption }}</p>
+            {% if section.yearly_source %}<p class="chart-source">{{ section.yearly_source }}</p>{% endif %}
           </div>
         </div>
 
@@ -156,12 +157,14 @@
               <div class="hero-chart-visual vega-chart-manual" id="h3-quadrant" data-chart="chart_h3_quadrant" data-aria-label="{{ section.finding.text }}"></div>
             </div>
             <p class="hero-chart-caption">{{ section.chart_caption }}</p>
+            {% if section.chart_source %}<p class="chart-source">{{ section.chart_source }}</p>{% endif %}
           </div>
           <div class="tab-panel" id="h3-panel-dumbbell" hidden>
             <div class="hero-chart-panel">
               <div class="hero-chart-visual vega-chart-lazy" data-chart="{{ section.dumbbell_chart_id }}" data-aria-label="{{ section.dumbbell_caption }}"></div>
             </div>
             <p class="hero-chart-caption">{{ section.dumbbell_caption }}</p>
+            {% if section.dumbbell_source %}<p class="chart-source">{{ section.dumbbell_source }}</p>{% endif %}
           </div>
         </div>
 
@@ -187,6 +190,7 @@
         <div class="hero-chart-panel">
           <div class="hero-chart-visual vega-chart" data-chart="{{ section.chart_id }}" data-aria-label="{{ section.finding.text if section.finding else section.chart_caption }}"></div>
           <p class="hero-chart-caption">{{ section.chart_caption }}</p>
+          {% if section.chart_source %}<p class="chart-source">{{ section.chart_source }}</p>{% endif %}
         </div>
         {% endif %}
 
@@ -284,6 +288,13 @@
           <li>{{ point }}</li>
           {% endfor %}
         </ul>
+        {% endif %}
+
+        {% if section.audience %}
+        <div class="audience-callout">
+          <span class="audience-label">{{ section.audience_label }}</span>
+          <p>{{ section.audience }}</p>
+        </div>
         {% endif %}
 
         {% if section.images %}
